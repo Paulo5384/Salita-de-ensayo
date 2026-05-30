@@ -284,7 +284,27 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
   };
 
   const leerArchivo=async(file)=>{
-    if(file.name.endsWith(".txt")){
+    if(file.name.endsWith(".pdf")){
+      setMsgs([{role:"bot",text:"Leyendo PDF..."}]);
+      try{
+        const ab=await file.arrayBuffer();
+        const arr=new Uint8Array(ab);
+        // Extraer texto plano del PDF buscando streams de texto BT...ET
+        const str=new TextDecoder("latin1").decode(arr);
+        const matches=str.match(/BT[\s\S]*?ET/g)||[];
+        let txt=matches.map(block=>{
+          const tj=block.match(/\(([^)]*)\)\s*T[jJ]/g)||[];
+          return tj.map(t=>t.replace(/\(([^)]*)\)\s*T[jJ]/,"$1")).join(" ");
+        }).join("\n").replace(/\\(\d{3})/g,(_,o)=>String.fromCharCode(parseInt(o,8))).trim();
+        if(!txt||txt.length<20){
+          // Fallback: extraer cualquier texto legible entre paréntesis
+          const raw=str.match(/\(([^\)]{2,80})\)/g)||[];
+          txt=raw.map(r=>r.slice(1,-1)).filter(r=>/[a-zA-ZáéíóúñÁÉÍÓÚÑ]{3,}/.test(r)).join(" ");
+        }
+        if(!txt||txt.length<10){setMsgs([{role:"bot",text:"No pude extraer texto del PDF. Prueba exportando como .txt desde Google Docs."}]);return;}
+        setFileText(txt);await procesarArchivo(txt);
+      }catch(e){setMsgs([{role:"bot",text:"Error leyendo PDF: "+e.message}]);}
+    } else if(file.name.endsWith(".txt")){
       const txt=await file.text();setFileText(txt);await procesarArchivo(txt);
     } else if(file.name.endsWith(".docx")){
       // Leer docx como texto plano extrayendo XML
@@ -365,8 +385,8 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
                 onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)leerArchivo(f);}}>
                 <div style={{fontSize:36}}>📄</div>
                 <p>Toca para subir un archivo</p>
-                <span>.txt o .docx con la letra y acordes</span>
-                <input id="file-inp" type="file" accept=".txt,.docx" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)leerArchivo(f);}}/>
+                <span>.txt, .docx o .pdf con la letra y acordes</span>
+                <input id="file-inp" type="file" accept=".txt,.docx,.pdf" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)leerArchivo(f);}}/>
               </div>
               {msgs.map((m,i)=>(<div key={i} className={`ia-msg-bot${m.thinking?" thinking":""}`}>{m.text}</div>))}
             </div>
