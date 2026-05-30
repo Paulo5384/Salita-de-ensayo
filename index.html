@@ -7,7 +7,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-<!-- Firebase CDN (compat = no bundler necesario) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -35,7 +34,7 @@ textarea{resize:none;}
 .badge-almost{background:#dbeafe;color:#1d4ed8;}
 .badge-done{background:#d1fae5;color:#065f46;}
 .content{max-width:560px;margin:0 auto;padding:16px;}
-.song-card{background:white;border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;border:2px solid transparent;transition:border-color 0.2s,box-shadow 0.2s;}
+.song-card{background:white;border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;border:2px solid transparent;}
 .song-card:active{border-color:#f59e0b;}
 .song-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px;}
 .song-card-top h3{font-size:16px;font-weight:700;color:#1f2937;}
@@ -44,6 +43,7 @@ textarea{resize:none;}
 .tag{background:#fef3c7;color:#92400e;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
 .song-falta{font-size:12px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .btn-new{width:100%;background:#f59e0b;color:white;border-radius:20px;padding:14px;font-size:16px;font-weight:700;margin-bottom:12px;}
+.btn-ia{width:100%;background:#7c3aed;color:white;border-radius:20px;padding:14px;font-size:16px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
 .filtros{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none;}
 .filtros::-webkit-scrollbar{display:none;}
 .filtro-btn{white-space:nowrap;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #e5e7eb;background:white;color:#6b7280;}
@@ -100,81 +100,116 @@ textarea{resize:none;}
 .btn-confirm-no{background:white;color:#6b7280;border:1.5px solid #e5e7eb;border-radius:12px;padding:8px 20px;font-size:14px;}
 .empty-msg{text-align:center;color:#9ca3af;font-size:14px;padding:32px 0;}
 .loading{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fffbf0;}
-.loading-inner{text-align:center;}
 .sync-dot{display:inline-block;width:8px;height:8px;background:#f59e0b;border-radius:50%;margin-left:6px;animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+/* IA Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;}
+.modal-sheet{background:white;border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.modal-header{background:#7c3aed;color:white;padding:16px 20px;display:flex;align-items:center;gap:12px;}
+.modal-header h2{flex:1;font-size:18px;font-weight:700;}
+.modal-body{flex:1;overflow-y:auto;padding:16px;}
+.modal-footer{padding:12px 16px;border-top:1.5px solid #f3f4f6;background:white;}
+.ia-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.ia-tab{flex:1;padding:8px;border-radius:12px;font-size:13px;font-weight:600;border:1.5px solid #e5e7eb;background:white;color:#6b7280;}
+.ia-tab.active{background:#7c3aed;color:white;border-color:#7c3aed;}
+.ia-msg-user{background:#f3f0ff;border-radius:16px 16px 4px 16px;padding:10px 14px;font-size:14px;margin-bottom:8px;margin-left:24px;}
+.ia-msg-bot{background:#f9fafb;border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:14px;margin-bottom:8px;margin-right:24px;border:1px solid #e5e7eb;}
+.ia-msg-bot.thinking{color:#9ca3af;font-style:italic;}
+.ia-input-row{display:flex;gap:8px;align-items:flex-end;}
+.ia-input-row textarea{flex:1;border:1.5px solid #e5e7eb;border-radius:16px;padding:10px 14px;font-size:14px;outline:none;max-height:100px;}
+.ia-input-row textarea:focus{border-color:#7c3aed;}
+.btn-send{background:#7c3aed;color:white;border-radius:16px;padding:10px 16px;font-size:16px;flex-shrink:0;}
+.btn-mic{background:#f3f0ff;color:#7c3aed;border-radius:16px;padding:10px 14px;font-size:18px;flex-shrink:0;border:1.5px solid #ddd6fe;}
+.btn-mic.recording{background:#ef4444;color:white;border-color:#ef4444;animation:pulse 0.8s infinite;}
+.preview-box{background:#f9fafb;border-radius:16px;padding:14px;border:1.5px solid #e5e7eb;margin-bottom:12px;}
+.preview-box h3{font-size:14px;font-weight:700;color:#7c3aed;margin-bottom:8px;}
+.preview-row{display:flex;gap:8px;margin-bottom:6px;font-size:13px;}
+.preview-row .lbl{color:#9ca3af;min-width:80px;font-weight:600;}
+.preview-row .val{color:#1f2937;}
+.btn-apply{width:100%;background:#7c3aed;color:white;border-radius:16px;padding:12px;font-size:15px;font-weight:700;}
+.upload-zone{border:2px dashed #ddd6fe;border-radius:16px;padding:24px;text-align:center;cursor:pointer;background:#faf5ff;margin-bottom:12px;}
+.upload-zone p{font-size:14px;color:#7c3aed;font-weight:600;margin-top:8px;}
+.upload-zone span{font-size:12px;color:#9ca3af;}
+.api-config{background:#f9fafb;border-radius:12px;padding:12px;margin-bottom:12px;}
+.api-config label{font-size:11px;font-weight:700;text-transform:uppercase;color:#9ca3af;display:block;margin-bottom:4px;}
+.api-config input{width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:7px 10px;font-size:13px;outline:none;}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script>
-// Inicializar Firebase (compat SDK, sin bundler)
-const firebaseConfig = {
-  apiKey: "AIzaSyAD6LJh7M8zzEBcPcKLtid0Od7an-I-y60",
-  authDomain: "salita-de-ensayo.firebaseapp.com",
-  projectId: "salita-de-ensayo",
-  storageBucket: "salita-de-ensayo.firebasestorage.app",
-  messagingSenderId: "277833011520",
-  appId: "1:277833011520:web:c3cd7a47271ebd035daaa5"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+firebase.initializeApp({
+  apiKey:"AIzaSyAD6LJh7M8zzEBcPcKLtid0Od7an-I-y60",
+  authDomain:"salita-de-ensayo.firebaseapp.com",
+  projectId:"salita-de-ensayo",
+  storageBucket:"salita-de-ensayo.firebasestorage.app",
+  messagingSenderId:"277833011520",
+  appId:"1:277833011520:web:c3cd7a47271ebd035daaa5"
+});
+const db=firebase.firestore();
 </script>
 <script type="text/babel">
-const {useState, useEffect, useCallback} = React;
+const {useState,useEffect,useRef}=React;
 
+// ── Transposición ──
 const NOTAS=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const ALIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
-function transponerAcorde(a,st){
-  const m=a.match(/^([A-G][b#]?)(.*)$/);if(!m)return a;
-  const[,r,s]=m;const n=ALIAS[r]||r;const i=NOTAS.indexOf(n);
-  if(i===-1)return a;return NOTAS[(i+st+12)%12]+s;
-}
-function transponerTexto(txt,st){
-  return txt.replace(/\[([^\]]+)\]/g,(_,a)=>`[${transponerAcorde(a,st)}]`);
-}
+const transpAcorde=(a,st)=>{const m=a.match(/^([A-G][b#]?)(.*)$/);if(!m)return a;const[,r,s]=m;const n=ALIAS[r]||r;const i=NOTAS.indexOf(n);return i===-1?a:NOTAS[(i+st+12)%12]+s;};
+const transpTexto=(t,st)=>t.replace(/\[([^\]]+)\]/g,(_,a)=>`[${transpAcorde(a,st)}]`);
 
 const ESTADOS=["Idea","En desarrollo","Casi lista","Terminada"];
-const BADGE={
-  "Idea":"badge badge-idea","En desarrollo":"badge badge-dev",
-  "Casi lista":"badge badge-almost","Terminada":"badge badge-done"
-};
-const CATS={
-  "Voces":["Voz principal","Segunda voz"],
-  "Cuerdas":["Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele"],
-  "Bajos":["Bajo","Ubass"],
-  "Teclados / Viento":["Teclado","Acordeón"],
-  "Percusión":["Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"]
-};
+const BADGE={"Idea":"badge badge-idea","En desarrollo":"badge badge-dev","Casi lista":"badge badge-almost","Terminada":"badge badge-done"};
+const CATS={"Voces":["Voz principal","Segunda voz"],"Cuerdas":["Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele"],"Bajos":["Bajo","Ubass"],"Teclados / Viento":["Teclado","Acordeón"],"Percusión":["Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"]};
 const TODOS_INSTR=Object.values(CATS).flat();
-const FICHA_VACIA={nombre:"",estado:"Idea",estilo:"",tempo:"",tonalidad:"",instrumentos:[],letra:"",audioUrl:"",queFalta:"",notasEnsayo:""};
 
+// ── Claude API ──
+async function callClaude(apiKey, messages, system) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,system,messages})
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error.message);
+  return data.content[0].text;
+}
+
+const SYSTEM_FICHA = `Eres un asistente para la app "Salita de Ensayo" del grupo musical Modesto Chaleca.
+Tu tarea es extraer información musical de lo que te diga el usuario y devolver SOLO un JSON válido con esta estructura exacta:
+{
+  "nombre": "string",
+  "estado": "Idea|En desarrollo|Casi lista|Terminada",
+  "estilo": "string",
+  "tempo": "string (ej: 90 BPM)",
+  "tonalidad": "string (ej: Am, G, D)",
+  "instrumentos": ["array de strings"],
+  "letra": "string (con acordes en formato [Am] antes de la sílaba donde cae)",
+  "queFalta": "string",
+  "notasEnsayo": "string",
+  "audioUrl": ""
+}
+Para la letra: si el usuario menciona acordes sobre palabras específicas, usa el formato [Am]sílaba.
+Si no tienes información para un campo, usa string vacío o array vacío.
+Responde SOLO con el JSON, sin texto adicional ni backticks.`;
+
+// ── Componentes ──
 function LetraCifrada({texto}){
   if(!texto)return <span className="field-empty">—</span>;
   return(
     <div className="letra-wrap">
-      {texto.split("\n").map((linea,li)=>{
-        if(!linea.includes("["))return <div key={li} className="letra-plain">{linea||"\u00A0"}</div>;
-        const tokens=[];let i=0;
-        while(i<linea.length){
-          if(linea[i]==="["){const e=linea.indexOf("]",i);if(e!==-1){tokens.push({t:"a",v:linea.slice(i+1,e)});i=e+1;}else{tokens.push({t:"x",v:linea[i]});i++;}}
-          else{let j=i;while(j<linea.length&&linea[j]!=="[")j++;tokens.push({t:"x",v:linea.slice(i,j)});i=j;}
+      {texto.split("\n").map((lin,li)=>{
+        if(!lin.includes("["))return <div key={li} className="letra-plain">{lin||"\u00A0"}</div>;
+        const tok=[];let i=0;
+        while(i<lin.length){
+          if(lin[i]==="["){const e=lin.indexOf("]",i);if(e!==-1){tok.push({t:"a",v:lin.slice(i+1,e)});i=e+1;}else{tok.push({t:"x",v:lin[i]});i++;}}
+          else{let j=i;while(j<lin.length&&lin[j]!=="[")j++;tok.push({t:"x",v:lin.slice(i,j)});i=j;}
         }
-        const grupos=[];let k=0;
-        while(k<tokens.length){
-          if(tokens[k].t==="a"){const a=tokens[k].v;const tx=tokens[k+1]?.t==="x"?tokens[k+1].v:"";grupos.push({a,tx});k+=tokens[k+1]?.t==="x"?2:1;}
-          else{grupos.push({a:null,tx:tokens[k].v});k++;}
+        const gr=[];let k=0;
+        while(k<tok.length){
+          if(tok[k].t==="a"){const a=tok[k].v;const tx=tok[k+1]?.t==="x"?tok[k+1].v:"";gr.push({a,tx});k+=tok[k+1]?.t==="x"?2:1;}
+          else{gr.push({a:null,tx:tok[k].v});k++;}
         }
-        return(
-          <div key={li} className="letra-linea">
-            {grupos.map((g,gi)=>(
-              <span key={gi} className="letra-grupo">
-                <span className="letra-acorde">{g.a||""}</span>
-                <span className="letra-texto">{g.tx}</span>
-              </span>
-            ))}
-          </div>
-        );
+        return(<div key={li} className="letra-linea">{gr.map((g,gi)=>(<span key={gi} className="letra-grupo"><span className="letra-acorde">{g.a||""}</span><span className="letra-texto">{g.tx}</span></span>))}</div>);
       })}
     </div>
   );
@@ -182,42 +217,190 @@ function LetraCifrada({texto}){
 
 function EditorLetra({value,onChange}){
   const[ac,setAc]=useState("");
-  const insertar=()=>{
-    if(!ac.trim())return;
-    const ta=document.getElementById("el");if(!ta)return;
-    const p=ta.selectionStart;
-    onChange(value.slice(0,p)+`[${ac.trim()}]`+value.slice(p));
-    setAc("");setTimeout(()=>{ta.focus();ta.selectionStart=ta.selectionEnd=p+ac.trim().length+2;},0);
-  };
-  return(
-    <div>
-      <div className="acorde-bar">
-        <span>Insertar acorde:</span>
-        <input value={ac} onChange={e=>setAc(e.target.value)} onKeyDown={e=>e.key==="Enter"&&insertar()} placeholder="Am, G7..." maxLength={6}/>
-        <button onClick={insertar}>↵</button>
-      </div>
-      <p className="acorde-hint">Posiciona el cursor en la sílaba, escribe el acorde y presiona ↵.</p>
-      <textarea id="el" value={value} onChange={e=>onChange(e.target.value)} rows={10}
-        placeholder={"Escribe la letra.\nUsa [Am] antes de la sílaba donde cae el acorde."}
-        className="field-textarea" style={{fontFamily:"monospace"}}/>
-    </div>
-  );
+  const ins=()=>{if(!ac.trim())return;const ta=document.getElementById("el");if(!ta)return;const p=ta.selectionStart;onChange(value.slice(0,p)+`[${ac.trim()}]`+value.slice(p));setAc("");setTimeout(()=>{ta.focus();ta.selectionStart=ta.selectionEnd=p+ac.trim().length+2;},0);};
+  return(<div>
+    <div className="acorde-bar"><span>Insertar acorde:</span><input value={ac} onChange={e=>setAc(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ins()} placeholder="Am, G7..." maxLength={6}/><button onClick={ins}>↵</button></div>
+    <p className="acorde-hint">Posiciona el cursor en la sílaba, escribe el acorde y presiona ↵.</p>
+    <textarea id="el" value={value} onChange={e=>onChange(e.target.value)} rows={10} placeholder={"Escribe la letra.\nUsa [Am] antes de la sílaba donde cae el acorde."} className="field-textarea" style={{fontFamily:"monospace"}}/>
+  </div>);
 }
 
 function Campo({label,value,onChange,multiline,placeholder,editando}){
+  return(<div style={{marginBottom:16}}>
+    <label className="field-label">{label}</label>
+    {editando
+      ? multiline?<textarea value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} rows={3} className="field-textarea"/>
+        :<input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} className="field-input"/>
+      :<p className="field-value">{value||<span className="field-empty">—</span>}</p>}
+  </div>);
+}
+
+// ── Modal IA ──
+function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
+  const[tab,setTab]=useState("chat"); // chat | archivo
+  const[msgs,setMsgs]=useState([{role:"bot",text:"¡Hola! Cuéntame sobre la canción que quieres agregar. Puedes dictarla por voz o escribirla. Dime nombre, estilo, instrumentos, letra con acordes, en qué estado está..."}]);
+  const[input,setInput]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[preview,setPreview]=useState(null);
+  const[recording,setRecording]=useState(false);
+  const[fileText,setFileText]=useState("");
+  const mediaRef=useRef(null);
+  const chunksRef=useRef([]);
+  const bottomRef=useRef(null);
+
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[msgs]);
+
+  const parseJSON=(txt)=>{
+    try{const clean=txt.replace(/```json|```/g,"").trim();return JSON.parse(clean);}catch{return null;}
+  };
+
+  const enviar=async(texto)=>{
+    if(!texto.trim())return;
+    if(!apiKey){alert("Ingresa tu API Key de Claude primero.");return;}
+    const userMsg={role:"user",text:texto};
+    setMsgs(p=>[...p,userMsg,{role:"bot",text:"...",thinking:true}]);
+    setInput("");setLoading(true);
+    try{
+      const history=[...msgs.filter(m=>m.role!=="bot"||!m.thinking).map(m=>({role:m.role==="bot"?"assistant":"user",content:m.text})),{role:"user",content:texto}];
+      const resp=await callClaude(apiKey,history,SYSTEM_FICHA);
+      const json=parseJSON(resp);
+      setMsgs(p=>[...p.slice(0,-1),{role:"bot",text:json?"He extraído la información. Revisa el resumen abajo y confirma si está correcto.":"No pude extraer la información. ¿Puedes darme más detalles?"}]);
+      if(json)setPreview(json);
+    }catch(e){setMsgs(p=>[...p.slice(0,-1),{role:"bot",text:"Error: "+e.message}]);}
+    setLoading(false);
+  };
+
+  const procesarArchivo=async(txt)=>{
+    if(!apiKey){alert("Ingresa tu API Key de Claude primero.");return;}
+    setLoading(true);
+    setMsgs([{role:"bot",text:"Procesando el archivo..."}]);
+    try{
+      const resp=await callClaude(apiKey,[{role:"user",content:"Extrae la información musical de este texto:\n\n"+txt}],SYSTEM_FICHA);
+      const json=parseJSON(resp);
+      setMsgs([{role:"bot",text:json?"¡Listo! Extraje la información del archivo. Revisa el resumen.":"No pude procesar el archivo."}]);
+      if(json)setPreview(json);
+    }catch(e){setMsgs([{role:"bot",text:"Error: "+e.message}]);}
+    setLoading(false);
+  };
+
+  const leerArchivo=async(file)=>{
+    if(file.name.endsWith(".txt")){
+      const txt=await file.text();setFileText(txt);await procesarArchivo(txt);
+    } else if(file.name.endsWith(".docx")){
+      // Leer docx como texto plano extrayendo XML
+      const ab=await file.arrayBuffer();
+      const arr=new Uint8Array(ab);
+      // Buscar el contenido word/document.xml dentro del zip
+      let txt="";
+      try{
+        // Convertir a string y extraer texto visible (método simple sin librería)
+        const str=new TextDecoder("utf-8",{fatal:false}).decode(arr);
+        const match=str.match(/<w:t[^>]*>([^<]*)<\/w:t>/g);
+        if(match)txt=match.map(m=>m.replace(/<[^>]+>/g,"")).join(" ");
+        else txt=str.replace(/<[^>]+>/g," ").replace(/\s+/g," ");
+      }catch{txt="No se pudo leer el archivo.";}
+      setFileText(txt);await procesarArchivo(txt);
+    } else {
+      const txt=await file.text();setFileText(txt);await procesarArchivo(txt);
+    }
+  };
+
+  const startRec=async()=>{
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      const mr=new MediaRecorder(stream);chunksRef.current=[];
+      mr.ondataavailable=e=>chunksRef.current.push(e.data);
+      mr.onstop=async()=>{
+        const blob=new Blob(chunksRef.current,{type:"audio/webm"});
+        stream.getTracks().forEach(t=>t.stop());
+        // Usar Web Speech API para transcripción (gratuita)
+        setMsgs(p=>[...p,{role:"bot",text:"(Audio grabado — el navegador no soporta transcripción automática sin servidor. Por favor escribe el mensaje.)"}]);
+        setRecording(false);
+      };
+      mr.start();mediaRef.current=mr;setRecording(true);
+    }catch{alert("No se pudo acceder al micrófono.");}
+  };
+  const stopRec=()=>{if(mediaRef.current)mediaRef.current.stop();};
+
+  // Speech recognition nativa (Chrome)
+  const startSpeech=()=>{
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){alert("Tu navegador no soporta reconocimiento de voz. Prueba en Chrome.");return;}
+    const r=new SR();r.lang="es-CL";r.continuous=false;r.interimResults=false;
+    r.onresult=e=>{const t=e.results[0][0].transcript;setInput(p=>p+" "+t);};
+    r.onerror=()=>{};
+    r.start();setRecording(true);
+    r.onend=()=>setRecording(false);
+  };
+
   return(
-    <div style={{marginBottom:16}}>
-      <label className="field-label">{label}</label>
-      {editando
-        ? multiline
-          ? <textarea value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} rows={3} className="field-textarea"/>
-          : <input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} className="field-input"/>
-        : <p className="field-value">{value||<span className="field-empty">—</span>}</p>
-      }
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-header">
+          <span style={{fontSize:24}}>✨</span>
+          <h2>Asistente IA</h2>
+          <button onClick={onClose} style={{background:"none",color:"white",fontSize:22}}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="api-config">
+            <label>API Key de Claude (Anthropic)</label>
+            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="sk-ant-..."/>
+          </div>
+          <div className="ia-tabs">
+            <button className={`ia-tab${tab==="chat"?" active":""}`} onClick={()=>setTab("chat")}>💬 Chat / Voz</button>
+            <button className={`ia-tab${tab==="archivo"?" active":""}`} onClick={()=>setTab("archivo")}>📄 Importar archivo</button>
+          </div>
+
+          {tab==="chat"&&(
+            <div>
+              {msgs.map((m,i)=>(
+                <div key={i} className={m.role==="user"?"ia-msg-user":`ia-msg-bot${m.thinking?" thinking":""}`}>{m.text}</div>
+              ))}
+              <div ref={bottomRef}/>
+            </div>
+          )}
+          {tab==="archivo"&&(
+            <div>
+              <div className="upload-zone" onClick={()=>document.getElementById("file-inp").click()}
+                onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)leerArchivo(f);}}>
+                <div style={{fontSize:36}}>📄</div>
+                <p>Toca para subir un archivo</p>
+                <span>.txt o .docx con la letra y acordes</span>
+                <input id="file-inp" type="file" accept=".txt,.docx" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)leerArchivo(f);}}/>
+              </div>
+              {msgs.map((m,i)=>(<div key={i} className={`ia-msg-bot${m.thinking?" thinking":""}`}>{m.text}</div>))}
+            </div>
+          )}
+
+          {preview&&(
+            <div className="preview-box">
+              <h3>✅ Canción detectada</h3>
+              {[["Nombre",preview.nombre],["Estado",preview.estado],["Estilo",preview.estilo],["Tempo",preview.tempo],["Tonalidad",preview.tonalidad],["Instrumentos",(preview.instrumentos||[]).join(", ")],["Qué falta",preview.queFalta]].map(([l,v])=>v&&(
+                <div key={l} className="preview-row"><span className="lbl">{l}</span><span className="val">{v}</span></div>
+              ))}
+              {preview.letra&&<div className="preview-row"><span className="lbl">Letra</span><span className="val" style={{fontSize:12,color:"#6b7280"}}>{preview.letra.slice(0,80)}...</span></div>}
+              <button className="btn-apply" style={{marginTop:12}} onClick={()=>{onCreateSong(preview);onClose();}}>
+                ➕ Agregar a la Salita
+              </button>
+            </div>
+          )}
+        </div>
+        {tab==="chat"&&(
+          <div className="modal-footer">
+            <div className="ia-input-row">
+              <button className={`btn-mic${recording?" recording":""}`} onClick={recording?stopRec:startSpeech}>{recording?"⏹":"🎤"}</button>
+              <textarea value={input} onChange={e=>setInput(e.target.value)} placeholder="Describe la canción..." rows={2}
+                onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();enviar(input);}}}/>
+              <button className="btn-send" onClick={()=>enviar(input)} disabled={loading}>➤</button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
+// ── Ficha ──
 function Ficha({cancion,onSave,onBack,onDelete}){
   const[data,setData]=useState({...cancion});
   const[editando,setEditando]=useState(!cancion.nombre);
@@ -227,236 +410,139 @@ function Ficha({cancion,onSave,onBack,onDelete}){
   const[guitalele,setGuitalele]=useState(false);
   const set=(k,v)=>setData(d=>({...d,[k]:v}));
   const toggleI=i=>set("instrumentos",data.instrumentos.includes(i)?data.instrumentos.filter(x=>x!==i):[...data.instrumentos,i]);
-  const guardarCambios=async()=>{
-    setSaving(true);
-    await onSave(data);
-    setSaving(false);
-    setEditando(false);
-  };
-  const letraVista=guitalele?transponerTexto(data.letra,5):data.letra;
-  const extras=data.instrumentos.filter(i=>!TODOS_INSTR.includes(i));
-
-  const getEmbed=url=>{
-    if(!url)return null;
-    if(url.includes("bandlab.com")){const m=url.match(/bandlab\.com\/[^/]+\/([a-zA-Z0-9_-]+)/);return m?`https://www.bandlab.com/embed/?id=${m[1]}`:null;}
-    if(url.includes("soundcloud.com"))return`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff7700&auto_play=false&hide_related=true&show_comments=false`;
-    if(url.includes("youtube.com")||url.includes("youtu.be")){const v=url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1];return v?`https://www.youtube.com/embed/${v}`:null;}
-    return null;
-  };
+  const guardar=async()=>{setSaving(true);await onSave(data);setSaving(false);setEditando(false);};
+  const letraVista=guitalele?transpTexto(data.letra,5):data.letra;
+  const extras=(data.instrumentos||[]).filter(i=>!TODOS_INSTR.includes(i));
+  const getEmbed=url=>{if(!url)return null;if(url.includes("bandlab.com")){const m=url.match(/bandlab\.com\/[^/]+\/([a-zA-Z0-9_-]+)/);return m?`https://www.bandlab.com/embed/?id=${m[1]}`:null;}if(url.includes("soundcloud.com"))return`https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff7700&auto_play=false&hide_related=true&show_comments=false`;if(url.includes("youtube.com")||url.includes("youtu.be")){const v=url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1];return v?`https://www.youtube.com/embed/${v}`:null;}return null;};
   const embedUrl=getEmbed(data.audioUrl);
-
   return(
     <div className="app">
       <div className="ficha-header">
         <div className="ficha-header-inner">
           <button className="btn-back" onClick={onBack}>←</button>
-          <div className="ficha-header-text">
-            <h1>{data.nombre||"Nueva canción"}</h1>
-            <span className={BADGE[data.estado]}>{data.estado}</span>
-          </div>
-          {editando
-            ? <button className="btn-save" onClick={guardarCambios} disabled={saving}>{saving?"...":"Guardar"}</button>
-            : <button className="btn-edit" onClick={()=>setEditando(true)}>Editar</button>
-          }
+          <div className="ficha-header-text"><h1>{data.nombre||"Nueva canción"}</h1><span className={BADGE[data.estado]}>{data.estado}</span></div>
+          {editando?<button className="btn-save" onClick={guardar} disabled={saving}>{saving?"...":"Guardar"}</button>:<button className="btn-edit" onClick={()=>setEditando(true)}>Editar</button>}
         </div>
       </div>
       <div className="content">
         <div className="ficha-section">
           {editando?(
             <div>
-              <div className="ficha-grid full" style={{marginBottom:10}}>
-                <div><label className="field-label">Nombre</label>
-                  <input value={data.nombre} onChange={e=>set("nombre",e.target.value)} placeholder="Nombre de la canción" className="field-input"/></div>
-              </div>
+              <div className="ficha-grid full" style={{marginBottom:10}}><div><label className="field-label">Nombre</label><input value={data.nombre} onChange={e=>set("nombre",e.target.value)} placeholder="Nombre de la canción" className="field-input"/></div></div>
               <div className="ficha-grid">
-                <div><label className="field-label">Estado</label>
-                  <select value={data.estado} onChange={e=>set("estado",e.target.value)} className="field-select">
-                    {ESTADOS.map(e=><option key={e}>{e}</option>)}
-                  </select></div>
-                <div><label className="field-label">Estilo</label>
-                  <input value={data.estilo} onChange={e=>set("estilo",e.target.value)} placeholder="Cumbia, balada..." className="field-input"/></div>
-                <div><label className="field-label">Tempo</label>
-                  <input value={data.tempo} onChange={e=>set("tempo",e.target.value)} placeholder="90 BPM" className="field-input"/></div>
-                <div><label className="field-label">Tonalidad</label>
-                  <input value={data.tonalidad} onChange={e=>set("tonalidad",e.target.value)} placeholder="Am, G..." className="field-input"/></div>
+                <div><label className="field-label">Estado</label><select value={data.estado} onChange={e=>set("estado",e.target.value)} className="field-select">{ESTADOS.map(e=><option key={e}>{e}</option>)}</select></div>
+                <div><label className="field-label">Estilo</label><input value={data.estilo} onChange={e=>set("estilo",e.target.value)} placeholder="Cumbia..." className="field-input"/></div>
+                <div><label className="field-label">Tempo</label><input value={data.tempo} onChange={e=>set("tempo",e.target.value)} placeholder="90 BPM" className="field-input"/></div>
+                <div><label className="field-label">Tonalidad</label><input value={data.tonalidad} onChange={e=>set("tonalidad",e.target.value)} placeholder="Am, G..." className="field-input"/></div>
               </div>
             </div>
           ):(
-            <div className="stats-row">
-              {[["🎵 Estilo",data.estilo],["⏱ Tempo",data.tempo],["🎼 Tonalidad",data.tonalidad]].map(([l,v])=>(
-                <div key={l} className="stat-item">
-                  <div className="stat-label">{l}</div>
-                  <div className="stat-val">{v||"—"}</div>
-                </div>
-              ))}
-            </div>
+            <div className="stats-row">{[["🎵 Estilo",data.estilo],["⏱ Tempo",data.tempo],["🎼 Tonalidad",data.tonalidad]].map(([l,v])=>(<div key={l} className="stat-item"><div className="stat-label">{l}</div><div className="stat-val">{v||"—"}</div></div>))}</div>
           )}
         </div>
-
         <div style={{marginBottom:16}}>
           <label className="field-label">Instrumentos acordados</label>
           {editando?(
             <div>
-              {Object.entries(CATS).map(([cat,instrs])=>(
-                <div key={cat}>
-                  <p className="instr-cat">{cat}</p>
-                  <div className="instr-tags">
-                    {instrs.map(i=>(
-                      <button key={i} onClick={()=>toggleI(i)} className={`instr-btn${data.instrumentos.includes(i)?" active":""}`}>{i}</button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {extras.length>0&&(
-                <div>
-                  <p className="instr-cat">Otros</p>
-                  <div className="instr-tags">
-                    {extras.map(i=><button key={i} onClick={()=>toggleI(i)} className="instr-btn active">{i}</button>)}
-                  </div>
-                </div>
-              )}
-              <div className="instr-add-row">
-                <input placeholder="Otro instrumento..." value={newI} onChange={e=>setNewI(e.target.value)}
-                  onKeyDown={e=>{if(e.key==="Enter"&&newI.trim()){toggleI(newI.trim());setNewI("");}}}/>
-                <button onClick={()=>{if(newI.trim()){toggleI(newI.trim());setNewI("");}}}>+</button>
-              </div>
+              {Object.entries(CATS).map(([cat,instrs])=>(<div key={cat}><p className="instr-cat">{cat}</p><div className="instr-tags">{instrs.map(i=>(<button key={i} onClick={()=>toggleI(i)} className={`instr-btn${(data.instrumentos||[]).includes(i)?" active":""}`}>{i}</button>))}</div></div>))}
+              {extras.length>0&&<div><p className="instr-cat">Otros</p><div className="instr-tags">{extras.map(i=><button key={i} onClick={()=>toggleI(i)} className="instr-btn active">{i}</button>)}</div></div>}
+              <div className="instr-add-row"><input placeholder="Otro instrumento..." value={newI} onChange={e=>setNewI(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&newI.trim()){toggleI(newI.trim());setNewI("");}}}/><button onClick={()=>{if(newI.trim()){toggleI(newI.trim());setNewI("");}}}>+</button></div>
             </div>
-          ):data.instrumentos.length>0?(
-            <div className="instr-tags">{data.instrumentos.map(i=><span key={i} className="tag">{i}</span>)}</div>
-          ):<span className="field-empty">Sin definir</span>}
+          ):(data.instrumentos||[]).length>0?<div className="instr-tags">{(data.instrumentos||[]).map(i=><span key={i} className="tag">{i}</span>)}</div>:<span className="field-empty">Sin definir</span>}
         </div>
-
         <hr className="divider"/>
-
         <div style={{marginBottom:16}}>
           <div className="letra-header">
             <label className="field-label" style={{margin:0}}>Letra y acordes</label>
-            {!editando&&(
-              <button onClick={()=>setGuitalele(g=>!g)} className={`btn-modo${guitalele?" active":""}`}>
-                {guitalele?"🎵 Guitalele":"🎸 Guitarra"}
-              </button>
-            )}
+            {!editando&&<button onClick={()=>setGuitalele(g=>!g)} className={`btn-modo${guitalele?" active":""}`}>{guitalele?"🎵 Guitalele":"🎸 Guitarra"}</button>}
           </div>
-          <div style={{marginTop:8}}>
-            {editando?<EditorLetra value={data.letra} onChange={v=>set("letra",v)}/>:<LetraCifrada texto={letraVista}/>}
-          </div>
+          <div style={{marginTop:8}}>{editando?<EditorLetra value={data.letra} onChange={v=>set("letra",v)}/>:<LetraCifrada texto={letraVista}/>}</div>
         </div>
-
         <hr className="divider"/>
-
         <div style={{marginBottom:16}}>
           <label className="field-label">Audio de referencia</label>
-          {editando&&(
-            <input value={data.audioUrl} onChange={e=>set("audioUrl",e.target.value)}
-              placeholder="Link de BandLab, YouTube o SoundCloud..." className="field-input" style={{marginBottom:8}}/>
-          )}
-          {embedUrl
-            ? <iframe src={embedUrl} className="audio-iframe" allow="autoplay" title="audio"/>
-            : !editando&&<p className="field-empty">Sin audio cargado</p>
-          }
+          {editando&&<input value={data.audioUrl||""} onChange={e=>set("audioUrl",e.target.value)} placeholder="Link de BandLab, YouTube o SoundCloud..." className="field-input" style={{marginBottom:8}}/>}
+          {embedUrl?<iframe src={embedUrl} className="audio-iframe" allow="autoplay" title="audio"/>:!editando&&<p className="field-empty">Sin audio cargado</p>}
         </div>
-
         <hr className="divider"/>
-        <Campo label="¿Qué falta para terminarla?" value={data.queFalta} onChange={v=>set("queFalta",v)} multiline placeholder="Lo que falta antes de darla por terminada..." editando={editando}/>
+        <Campo label="¿Qué falta para terminarla?" value={data.queFalta||""} onChange={v=>set("queFalta",v)} multiline placeholder="Lo que falta antes de darla por terminada..." editando={editando}/>
         <hr className="divider"/>
-        <Campo label="Notas del último ensayo" value={data.notasEnsayo} onChange={v=>set("notasEnsayo",v)} multiline placeholder="Ideas, acuerdos, cosas pendientes..." editando={editando}/>
-
-        {editando&&<button className="btn-guardar-big" onClick={guardarCambios} disabled={saving}>{saving?"Guardando...":"Guardar ficha"}</button>}
-
+        <Campo label="Notas del último ensayo" value={data.notasEnsayo||""} onChange={v=>set("notasEnsayo",v)} multiline placeholder="Ideas, acuerdos, cosas pendientes..." editando={editando}/>
+        {editando&&<button className="btn-guardar-big" onClick={guardar} disabled={saving}>{saving?"Guardando...":"Guardar ficha"}</button>}
         <div className="eliminar-zone">
-          {confirm?(
-            <div className="confirm-box">
-              <p>¿Eliminar "{data.nombre}" definitivamente?</p>
-              <div className="confirm-row">
-                <button className="btn-confirm-yes" onClick={()=>onDelete(data.id)}>Sí, eliminar</button>
-                <button className="btn-confirm-no" onClick={()=>setConfirm(false)}>Cancelar</button>
-              </div>
-            </div>
-          ):<button className="btn-eliminar" onClick={()=>setConfirm(true)}>Eliminar esta canción</button>}
+          {confirm?(<div className="confirm-box"><p>¿Eliminar "{data.nombre}" definitivamente?</p><div className="confirm-row"><button className="btn-confirm-yes" onClick={()=>onDelete(data.id)}>Sí, eliminar</button><button className="btn-confirm-no" onClick={()=>setConfirm(false)}>Cancelar</button></div></div>)
+          :<button className="btn-eliminar" onClick={()=>setConfirm(true)}>Eliminar esta canción</button>}
         </div>
       </div>
     </div>
   );
 }
 
+// ── App principal ──
 function App(){
   const[canciones,setCanciones]=useState(null);
   const[selected,setSelected]=useState(null);
   const[showNueva,setShowNueva]=useState(false);
+  const[showIA,setShowIA]=useState(false);
   const[nombreNueva,setNombreNueva]=useState("");
   const[filtro,setFiltro]=useState("Todas");
   const[syncing,setSyncing]=useState(false);
+  const[apiKey,setApiKey]=useState(()=>localStorage.getItem("claude-api-key")||"");
 
-  // Cargar desde Firestore al iniciar
+  useEffect(()=>{if(apiKey)localStorage.setItem("claude-api-key",apiKey);},[apiKey]);
+
   useEffect(()=>{
-    const unsub = db.collection("canciones").orderBy("createdAt","asc").onSnapshot(snap=>{
-      const data = snap.docs.map(d=>({id:d.id,...d.data()}));
-      setCanciones(data);
-    }, err=>{
-      console.error("Firestore error:",err);
-      setCanciones([]);
-    });
-    return ()=>unsub();
+    const unsub=db.collection("canciones").orderBy("createdAt","asc").onSnapshot(snap=>{
+      setCanciones(snap.docs.map(d=>({id:d.id,...d.data()})));
+    },()=>setCanciones([]));
+    return()=>unsub();
   },[]);
 
-  const saveSong = async(u) => {
+  const saveSong=async(u)=>{
     setSyncing(true);
-    try {
-      const {id,...rest} = u;
-      await db.collection("canciones").doc(String(id)).set({...rest, updatedAt: firebase.firestore.FieldValue.serverTimestamp()});
-      setSelected(u);
-    } catch(e){ console.error(e); }
-    setSyncing(false);
+    const{id,...rest}=u;
+    await db.collection("canciones").doc(String(id)).set({...rest,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    setSelected(u);setSyncing(false);
   };
 
-  const deleteSong = async(id) => {
+  const deleteSong=async(id)=>{
     setSyncing(true);
-    try {
-      await db.collection("canciones").doc(String(id)).delete();
-      setSelected(null);
-    } catch(e){ console.error(e); }
-    setSyncing(false);
+    await db.collection("canciones").doc(String(id)).delete();
+    setSelected(null);setSyncing(false);
   };
 
-  const crear = async() => {
-    if(!nombreNueva.trim())return;
+  const crear=async(nombre)=>{
     setSyncing(true);
-    try {
-      const n = {
-        nombre:nombreNueva, estado:"Idea", estilo:"", tempo:"", tonalidad:"",
-        instrumentos:[], letra:"", audioUrl:"", queFalta:"", notasEnsayo:"",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      const ref = await db.collection("canciones").add(n);
-      const nueva = {id:ref.id,...n};
-      setNombreNueva("");setShowNueva(false);setSelected(nueva);
-    } catch(e){ console.error(e); }
-    setSyncing(false);
+    const n={nombre,estado:"Idea",estilo:"",tempo:"",tonalidad:"",instrumentos:[],letra:"",audioUrl:"",queFalta:"",notasEnsayo:"",createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    const ref=await db.collection("canciones").add(n);
+    const nueva={id:ref.id,...n};
+    setNombreNueva("");setShowNueva(false);setSelected(nueva);setSyncing(false);
   };
 
-  if(canciones===null) return(
-    <div className="loading">
-      <div className="loading-inner">
-        <div style={{fontSize:48}}>🪗</div>
-        <p style={{color:"#92400e",fontWeight:600,marginTop:8}}>Cargando Salita...</p>
-      </div>
-    </div>
-  );
+  const crearDesdeIA=async(data)=>{
+    setSyncing(true);
+    const n={...data,instrumentos:data.instrumentos||[],createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    const ref=await db.collection("canciones").add(n);
+    const nueva={id:ref.id,...n};
+    setSelected(nueva);setSyncing(false);
+  };
+
+  if(!canciones)return(<div className="loading"><div style={{textAlign:"center"}}><div style={{fontSize:48}}>🪗</div><p style={{color:"#92400e",fontWeight:600,marginTop:8}}>Cargando Salita...</p></div></div>);
 
   if(selected){
-    // Buscar versión actualizada desde canciones
-    const fresh = canciones.find(c=>c.id===selected.id)||selected;
-    return <Ficha cancion={fresh} onSave={saveSong} onBack={()=>setSelected(null)} onDelete={deleteSong}/>;
+    const fresh=canciones.find(c=>c.id===selected.id)||selected;
+    return<Ficha cancion={fresh} onSave={saveSong} onBack={()=>setSelected(null)} onDelete={deleteSong}/>;
   }
 
   const filtradas=filtro==="Todas"?canciones:canciones.filter(c=>c.estado===filtro);
 
   return(
     <div className="app">
+      {showIA&&<IAModal onClose={()=>setShowIA(false)} onCreateSong={crearDesdeIA} apiKey={apiKey} setApiKey={setApiKey}/>}
       <div className="header">
         <div className="header-inner">
           <div className="header-emoji">🪗</div>
-          <h1>Salita de Ensayo <span className="sync-dot" style={{display:syncing?"inline-block":"none"}}></span></h1>
+          <h1>Salita de Ensayo{syncing&&<span className="sync-dot"/>}</h1>
           <p>Modesto Chaleca</p>
         </div>
       </div>
@@ -468,32 +554,20 @@ function App(){
             </button>
           ))}
         </div>
+        <button className="btn-ia" onClick={()=>setShowIA(true)}>✨ Agregar canción con IA</button>
         {showNueva?(
           <div className="nueva-input-row">
-            <input autoFocus placeholder="Nombre de la canción..." value={nombreNueva}
-              onChange={e=>setNombreNueva(e.target.value)} onKeyDown={e=>e.key==="Enter"&&crear()}/>
-            <button className="btn-crear" onClick={crear}>Crear</button>
+            <input autoFocus placeholder="Nombre de la canción..." value={nombreNueva} onChange={e=>setNombreNueva(e.target.value)} onKeyDown={e=>e.key==="Enter"&&crear(nombreNueva)}/>
+            <button className="btn-crear" onClick={()=>crear(nombreNueva)}>Crear</button>
             <button className="btn-cancelar" onClick={()=>setShowNueva(false)}>✕</button>
           </div>
-        ):<button className="btn-new" onClick={()=>setShowNueva(true)}>+ Nueva canción</button>}
+        ):<button className="btn-new" onClick={()=>setShowNueva(true)}>+ Nueva canción (manual)</button>}
         {filtradas.length===0&&<p className="empty-msg">{canciones.length===0?"Aún no hay canciones. ¡Crea la primera!":"No hay canciones en este estado."}</p>}
         {filtradas.map(c=>(
           <div key={c.id} className="song-card" onClick={()=>setSelected(c)}>
-            <div className="song-card-top">
-              <h3>{c.nombre}</h3>
-              <span className={BADGE[c.estado]}>{c.estado}</span>
-            </div>
-            <div className="song-meta">
-              {c.estilo&&<span>🎵 {c.estilo}</span>}
-              {c.tempo&&<span>⏱ {c.tempo}</span>}
-              {c.tonalidad&&<span>🎼 {c.tonalidad}</span>}
-            </div>
-            {c.instrumentos&&c.instrumentos.length>0&&(
-              <div className="tags">
-                {c.instrumentos.slice(0,4).map(i=><span key={i} className="tag">{i}</span>)}
-                {c.instrumentos.length>4&&<span style={{fontSize:12,color:"#9ca3af",padding:"3px 4px"}}>+{c.instrumentos.length-4} más</span>}
-              </div>
-            )}
+            <div className="song-card-top"><h3>{c.nombre}</h3><span className={BADGE[c.estado]}>{c.estado}</span></div>
+            <div className="song-meta">{c.estilo&&<span>🎵 {c.estilo}</span>}{c.tempo&&<span>⏱ {c.tempo}</span>}{c.tonalidad&&<span>🎼 {c.tonalidad}</span>}</div>
+            {(c.instrumentos||[]).length>0&&(<div className="tags">{(c.instrumentos||[]).slice(0,4).map(i=><span key={i} className="tag">{i}</span>)}{c.instrumentos.length>4&&<span style={{fontSize:12,color:"#9ca3af",padding:"3px 4px"}}>+{c.instrumentos.length-4} más</span>}</div>)}
             {c.queFalta&&<p className="song-falta">⚠️ {c.queFalta}</p>}
           </div>
         ))}
