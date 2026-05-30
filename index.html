@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Salita de Ensayo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// ── TRANSPOSICIÓN ─────────────────────────────────────────────────────────
+const NOTAS = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const ALIAS = {"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
+function transponerAcorde(acorde, st) {
+  const m = acorde.match(/^([A-G][b#]?)(.*)$/);
+  if (!m) return acorde;
+  const [,raiz,suf] = m;
+  const norm = ALIAS[raiz]||raiz;
+  const idx = NOTAS.indexOf(norm);
+  if (idx===-1) return acorde;
+  return NOTAS[(idx+st+12)%12]+suf;
+}
+function transponerTexto(txt, st) {
+  return txt.replace(/\[([^\]]+)\]/g, (_,a)=>`[${transponerAcorde(a,st)}]`);
+}
+
+// ── DATOS ─────────────────────────────────────────────────────────────────
+const ESTADOS = ["Idea","En desarrollo","Casi lista","Terminada"];
+const ESTADO_COLOR = {
+  "Idea":"background:#f3f4f6;color:#6b7280",
+  "En desarrollo":"background:#fef9c3;color:#a16207",
+  "Casi lista":"background:#dbeafe;color:#1d4ed8",
+  "Terminada":"background:#d1fae5;color:#065f46"
+};
+const ESTADO_CLASS = {
+  "Idea":"bg-gray-100 text-gray-500",
+  "En desarrollo":"bg-yellow-100 text-yellow-700",
+  "Casi lista":"bg-blue-100 text-blue-700",
+  "Terminada":"bg-green-100 text-green-700"
+};
+const INSTRUMENTOS_BASE = [
+  "Voz principal","Segunda voz",
+  "Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele",
+  "Bajo","Ubass","Teclado","Acordeón",
+  "Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"
+];
+const CATS = {
+  "Voces":["Voz principal","Segunda voz"],
+  "Cuerdas":["Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele"],
+  "Bajos":["Bajo","Ubass"],
+  "Teclados / Viento":["Teclado","Acordeón"],
+  "Percusión":["Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"]
+};
+const FICHA_VACIA = {nombre:"",estado:"Idea",estilo:"",tempo:"",tonalidad:"",instrumentos:[],letra:"",audioUrl:"",queFalta:"",notasEnsayo:""};
+const DEFAULT = [
+  {id:1,nombre:"El río no espera",estado:"En desarrollo",estilo:"Cumbia",tempo:"92 BPM",tonalidad:"Am",
+   instrumentos:["Voz principal","Guitarra de palo","Bajo","Acordeón","Cajón peruano","Jamblock"],
+   letra:"[Am]El río no es[G]pera, compadre,\nlas [F]aguas no vuelven ja[E]más.\nLo que se [Am]fue con la co[G]rriente\nno hay [F]forma de recu[E]perar.\n\nCoro:\n¡Ay, [F]río! ¡Ay, [G]vida!\nCorre sin pa[Am]rar.\nLo que hoy es [E]tuyo\nma[Am]ñana se irá.",
+   audioUrl:"",queFalta:"Grabar maqueta de voz. Definir entrada del acordeón en el puente.",
+   notasEnsayo:"Marco propone subir medio tono el coro. Adolfo trae propuesta de acordeón para el jueves."},
+  {id:2,nombre:"Lluvia de lunes",estado:"Idea",estilo:"Balada",tempo:"75 BPM",tonalidad:"G",
+   instrumentos:["Voz principal","Guitarra de palo"],
+   letra:"[G]La lluvia de los [Em]lunes\nme [C]habla de [D]ti.\n[G]Cada gota en el [Em]vidrio\nes un qui[D]zás...",
+   audioUrl:"",queFalta:"Completar letra. Definir si entra bajo.",
+   notasEnsayo:"Surgió en el ensayo del 20 mayo. Paulo tiene la melodía del coro."}
+];
+
+function cargar(key, fallback) {
+  try { const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; } catch { return fallback; }
+}
+function guardar(key, value) {
+  try { localStorage.setItem(key,JSON.stringify(value)); } catch {} 
+}
+
+// ── CIFRADO ───────────────────────────────────────────────────────────────
+function LetraCifrada({texto}) {
+  if (!texto) return React.createElement('span',{className:"text-gray-300 italic text-sm"},"—");
+  return React.createElement('div',{className:"text-sm leading-loose"},
+    texto.split("\n").map((linea,li)=>{
+      if (!linea.includes("[")) return React.createElement('div',{key:li,className:"mb-1"},
+        React.createElement('span',{className:"text-gray-800"},linea||"\u00A0"));
+      const tokens=[];
+      let i=0;
+      while(i<linea.length){
+        if(linea[i]==="["){const end=linea.indexOf("]",i);if(end!==-1){tokens.push({t:"a",v:linea.slice(i+1,end)});i=end+1;}else{tokens.push({t:"x",v:linea[i]});i++;}}
+        else{let j=i;while(j<linea.length&&linea[j]!=="[")j++;tokens.push({t:"x",v:linea.slice(i,j)});i=j;}
+      }
+      const grupos=[];let k=0;
+      while(k<tokens.length){
+        if(tokens[k].t==="a"){const a=tokens[k].v;const tx=tokens[k+1]?.t==="x"?tokens[k+1].v:"";grupos.push({a,tx});k+=tokens[k+1]?.t==="x"?2:1;}
+        else{grupos.push({a:null,tx:tokens[k].v});k++;}
+      }
+      return React.createElement('div',{key:li,className:"flex flex-wrap items-end mb-2"},
+        grupos.map((g,gi)=>React.createElement('span',{key:gi,className:"inline-flex flex-col items-start mr-0.5"},
+          React.createElement('span',{style:{color:"#d97706",fontWeight:"bold",fontSize:"0.75rem",lineHeight:1,minHeight:"14px",marginBottom:"2px"}},g.a||""),
+          React.createElement('span',{className:"text-gray-800 text-sm",style:{whiteSpace:"pre"}},g.tx)
+        ))
+      );
+    })
+  );
+}
+
+// ── EDITOR LETRA ──────────────────────────────────────────────────────────
+function EditorLetra({value,onChange}) {
+  const [acorde,setAcorde]=useState("");
+  const insertar=()=>{
+    if(!acorde.trim())return;
+    const ta=document.getElementById("editor-letra");
+    if(!ta)return;
+    const pos=ta.selectionStart;
+    const nuevo=value.slice(0,pos)+`[${acorde.trim()}]`+value.slice(pos);
+    onChange(nuevo);setAcorde("");
+    setTimeout(()=>{ta.focus();ta.selectionStart=ta.selectionEnd=pos+acorde.trim().length+2;},0);
+  };
+  return React.createElement('div',{className:"space-y-2"},
+    React.createElement('div',{className:"flex gap-2 items-center bg-yellow-50 rounded-xl px-3 py-2 border border-yellow-200"},
+      React.createElement('span',{className:"text-xs text-yellow-700 font-medium flex-shrink-0"},"Insertar acorde:"),
+      React.createElement('input',{value:acorde,onChange:e=>setAcorde(e.target.value),onKeyDown:e=>e.key==="Enter"&&insertar(),placeholder:"Am, G7...",maxLength:6,className:"flex-1 bg-transparent text-sm focus:outline-none text-gray-700 min-w-0"}),
+      React.createElement('button',{onClick:insertar,className:"bg-yellow-500 text-white text-xs px-3 py-1 rounded-lg font-bold flex-shrink-0"},"↵")
+    ),
+    React.createElement('p',{className:"text-xs text-gray-400 px-1"},"Posiciona el cursor, escribe el acorde y presiona ↵. O escribe [Am] directo."),
+    React.createElement('textarea',{id:"editor-letra",value,onChange:e=>onChange(e.target.value),
+      placeholder:"Escribe la letra.\nUsa [Am] antes de la sílaba donde cae el acorde.\nEjemplo: [Am]El río no es[G]pera",
+      className:"w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none font-mono leading-relaxed",
+      style:{outline:"none"},rows:10})
+  );
+}
+
+// ── CAMPO ─────────────────────────────────────────────────────────────────
+function Campo({label,value,onChange,multiline,placeholder,editando}) {
+  return React.createElement('div',{className:"mb-4"},
+    React.createElement('label',{className:"text-xs font-bold text-gray-400 uppercase tracking-wide mb-1 block"},label),
+    editando
+      ? multiline
+        ? React.createElement('textarea',{value,onChange:e=>onChange(e.target.value),placeholder,rows:3,className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none",style:{outline:"none",background:"#fffbf0"}})
+        : React.createElement('input',{value,onChange:e=>onChange(e.target.value),placeholder,className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm",style:{outline:"none",background:"#fffbf0"}})
+      : React.createElement('p',{className:"text-sm text-gray-800 whitespace-pre-wrap leading-relaxed"},value||React.createElement('span',{className:"text-gray-300 italic"},"—"))
+  );
+}
+
+// ── FICHA ─────────────────────────────────────────────────────────────────
+function Ficha({cancion,onSave,onBack,onDelete}) {
+  const [data,setData]=useState({...cancion});
+  const [editando,setEditando]=useState(!cancion.nombre);
+  const [newInstr,setNewInstr]=useState("");
+  const [confirmar,setConfirmar]=useState(false);
+  const [guitalele,setGuitalele]=useState(false);
+  const set=(k,v)=>setData(d=>({...d,[k]:v}));
+  const toggleInstr=i=>set("instrumentos",data.instrumentos.includes(i)?data.instrumentos.filter(x=>x!==i):[...data.instrumentos,i]);
+  const guardarCambios=()=>{onSave(data);setEditando(false);};
+  const letraVista=guitalele?transponerTexto(data.letra,5):data.letra;
+  const getEmbed=url=>{
+    if(!url)return null;
+    if(url.includes("bandlab.com")){const m=url.match(/bandlab\.com\/[^/]+\/([a-zA-Z0-9_-]+)/);return m?`https://www.bandlab.com/embed/?id=${m[1]}`:null;}
+    if(url.includes("soundcloud.com"))return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%23ff7700&auto_play=false&hide_related=true&show_comments=false`;
+    if(url.includes("youtube.com")||url.includes("youtu.be")){const v=url.match(/(?:v=|youtu\.be\/)([^&?/]+)/)?.[1];return v?`https://www.youtube.com/embed/${v}`:null;}
+    return null;
+  };
+  const embedUrl=getEmbed(data.audioUrl);
+  const extras=data.instrumentos.filter(i=>!INSTRUMENTOS_BASE.includes(i));
+
+  return React.createElement('div',{className:"min-h-screen bg-white"},
+    // Header
+    React.createElement('div',{style:{background:"#78350f"},className:"text-white px-4 py-3 sticky top-0 z-10"},
+      React.createElement('div',{className:"flex items-center gap-3 max-w-xl mx-auto"},
+        React.createElement('button',{onClick:onBack,className:"text-yellow-300 text-xl"},"←"),
+        React.createElement('div',{className:"flex-1 min-w-0"},
+          React.createElement('h1',{className:"font-bold text-base truncate"},data.nombre||"Nueva canción"),
+          React.createElement('span',{className:`text-xs px-2 py-0.5 rounded-full font-medium ${ESTADO_CLASS[data.estado]}`},data.estado)
+        ),
+        editando
+          ? React.createElement('button',{onClick:guardarCambios,className:"bg-yellow-500 text-white text-sm px-4 py-1.5 rounded-xl font-bold"},"Guardar")
+          : React.createElement('button',{onClick:()=>setEditando(true),className:"text-white text-sm px-4 py-1.5 rounded-xl border border-white border-opacity-30"},"Editar")
+      )
+    ),
+    React.createElement('div',{className:"max-w-xl mx-auto px-4 py-5"},
+      // Datos básicos
+      React.createElement('div',{className:"bg-yellow-50 rounded-2xl p-4 mb-5"},
+        editando
+          ? React.createElement('div',{className:"grid grid-cols-2 gap-3"},
+              React.createElement('div',{className:"col-span-2"},
+                React.createElement('label',{className:"text-xs font-bold text-gray-400 uppercase mb-1 block"},"Nombre"),
+                React.createElement('input',{value:data.nombre,onChange:e=>set("nombre",e.target.value),placeholder:"Nombre de la canción",className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white",style:{outline:"none"}})
+              ),
+              React.createElement('div',null,
+                React.createElement('label',{className:"text-xs font-bold text-gray-400 uppercase mb-1 block"},"Estado"),
+                React.createElement('select',{value:data.estado,onChange:e=>set("estado",e.target.value),className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white"},
+                  ESTADOS.map(e=>React.createElement('option',{key:e},e)))
+              ),
+              React.createElement('div',null,
+                React.createElement('label',{className:"text-xs font-bold text-gray-400 uppercase mb-1 block"},"Estilo"),
+                React.createElement('input',{value:data.estilo,onChange:e=>set("estilo",e.target.value),placeholder:"Cumbia, balada...",className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white",style:{outline:"none"}})
+              ),
+              React.createElement('div',null,
+                React.createElement('label',{className:"text-xs font-bold text-gray-400 uppercase mb-1 block"},"Tempo"),
+                React.createElement('input',{value:data.tempo,onChange:e=>set("tempo",e.target.value),placeholder:"90 BPM",className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white",style:{outline:"none"}})
+              ),
+              React.createElement('div',{className:"col-span-2"},
+                React.createElement('label',{className:"text-xs font-bold text-gray-400 uppercase mb-1 block"},"Tonalidad"),
+                React.createElement('input',{value:data.tonalidad,onChange:e=>set("tonalidad",e.target.value),placeholder:"Am, G...",className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white",style:{outline:"none"}})
+              )
+            )
+          : React.createElement('div',{className:"grid grid-cols-3 gap-3 text-center"},
+              [["🎵 Estilo",data.estilo],["⏱ Tempo",data.tempo],["🎼 Tonalidad",data.tonalidad]].map(([l,v])=>
+                React.createElement('div',{key:l},
+                  React.createElement('p',{className:"text-xs text-gray-400 font-bold"},l),
+                  React.createElement('p',{className:"text-sm font-semibold text-gray-800 mt-1"},v||"—")
+                )
+              )
+            )
+      ),
+
+      // Instrumentos
+      React.createElement('div',{className:"mb-5"},
+        React.createElement('p',{className:"text-xs font-bold text-gray-400 uppercase tracking-wide mb-2"},"Instrumentos acordados"),
+        editando
+          ? React.createElement('div',{className:"space-y-3"},
+              Object.entries(CATS).map(([cat,instrs])=>
+                React.createElement('div',{key:cat},
+                  React.createElement('p',{className:"text-xs text-gray-400 font-semibold mb-1"},cat),
+                  React.createElement('div',{className:"flex flex-wrap gap-2"},
+                    instrs.map(instr=>React.createElement('button',{key:instr,onClick:()=>toggleInstr(instr),
+                      className:`text-xs px-3 py-1.5 rounded-full border font-medium ${data.instrumentos.includes(instr)?"bg-yellow-500 text-white border-yellow-500":"bg-white text-gray-500 border-gray-200"}`},instr))
+                  )
+                )
+              ),
+              extras.length>0&&React.createElement('div',null,
+                React.createElement('p',{className:"text-xs text-gray-400 font-semibold mb-1"},"Otros"),
+                React.createElement('div',{className:"flex flex-wrap gap-2"},
+                  extras.map(i=>React.createElement('button',{key:i,onClick:()=>toggleInstr(i),className:"text-xs px-3 py-1.5 rounded-full border font-medium bg-yellow-500 text-white border-yellow-500"},i))
+                )
+              ),
+              React.createElement('div',{className:"flex gap-2 mt-1"},
+                React.createElement('input',{placeholder:"Otro instrumento...",value:newInstr,onChange:e=>setNewInstr(e.target.value),
+                  onKeyDown:e=>{if(e.key==="Enter"&&newInstr.trim()){toggleInstr(newInstr.trim());setNewInstr("");}},
+                  className:"flex-1 border border-gray-200 rounded-xl px-3 py-1.5 text-xs",style:{outline:"none"}}),
+                React.createElement('button',{onClick:()=>{if(newInstr.trim()){toggleInstr(newInstr.trim());setNewInstr("");}},className:"bg-yellow-500 text-white text-xs px-3 py-1.5 rounded-xl font-bold"},"+")
+              )
+            )
+          : data.instrumentos.length>0
+            ? React.createElement('div',{className:"flex flex-wrap gap-2"},
+                data.instrumentos.map(i=>React.createElement('span',{key:i,className:"text-xs bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full font-medium"},i))
+              )
+            : React.createElement('span',{className:"text-sm text-gray-300 italic"},"Sin definir")
+      ),
+
+      React.createElement('hr',{className:"border-gray-100 my-4"}),
+
+      // Letra + cifrado
+      React.createElement('div',{className:"mb-4"},
+        React.createElement('div',{className:"flex justify-between items-center mb-2"},
+          React.createElement('label',{className:"text-xs font-bold text-gray-400 uppercase tracking-wide"},"Letra y acordes"),
+          !editando&&React.createElement('button',{onClick:()=>setGuitalele(g=>!g),
+            className:`text-xs px-3 py-1.5 rounded-full font-medium border transition-all ${guitalele?"bg-yellow-500 text-white border-yellow-500":"bg-white text-gray-500 border-gray-200"}`},
+            guitalele?"🎵 Guitalele":"🎸 Guitarra")
+        ),
+        editando?React.createElement(EditorLetra,{value:data.letra,onChange:v=>set("letra",v)}):React.createElement(LetraCifrada,{texto:letraVista})
+      ),
+
+      React.createElement('hr',{className:"border-gray-100 my-4"}),
+
+      // Audio
+      React.createElement('div',{className:"mb-5"},
+        React.createElement('p',{className:"text-xs font-bold text-gray-400 uppercase tracking-wide mb-2"},"Audio de referencia"),
+        editando&&React.createElement('input',{value:data.audioUrl,onChange:e=>set("audioUrl",e.target.value),
+          placeholder:"Link de BandLab, YouTube o SoundCloud...",
+          className:"w-full border border-gray-200 rounded-xl px-3 py-2 text-sm mb-2",style:{outline:"none",background:"#fffbf0"}}),
+        embedUrl
+          ? React.createElement('iframe',{src:embedUrl,width:"100%",height:"120",frameBorder:"0",allow:"autoplay",className:"rounded-xl block",title:"audio"})
+          : !editando&&React.createElement('p',{className:"text-sm text-gray-300 italic"},"Sin audio cargado")
+      ),
+
+      React.createElement('hr',{className:"border-gray-100 my-4"}),
+      React.createElement(Campo,{label:"¿Qué falta para terminarla?",value:data.queFalta,onChange:v=>set("queFalta",v),multiline:true,placeholder:"Lo que falta antes de darla por terminada...",editando}),
+      React.createElement('hr',{className:"border-gray-100 my-4"}),
+      React.createElement(Campo,{label:"Notas del último ensayo",value:data.notasEnsayo,onChange:v=>set("notasEnsayo",v),multiline:true,placeholder:"Ideas, acuerdos, cosas pendientes...",editando}),
+
+      editando&&React.createElement('button',{onClick:guardarCambios,className:"w-full bg-yellow-500 text-white rounded-2xl py-3 font-bold text-base mt-2 mb-4"},"Guardar ficha"),
+
+      // Eliminar
+      React.createElement('div',{className:"mt-6 border-t border-gray-100 pt-4"},
+        confirmar
+          ? React.createElement('div',{className:"bg-red-50 rounded-2xl p-4 text-center space-y-3"},
+              React.createElement('p',{className:"text-sm text-red-700 font-medium"},`¿Eliminar "${data.nombre}" definitivamente?`),
+              React.createElement('div',{className:"flex gap-2 justify-center"},
+                React.createElement('button',{onClick:()=>onDelete(data.id),className:"bg-red-500 text-white text-sm px-4 py-2 rounded-xl font-medium"},"Sí, eliminar"),
+                React.createElement('button',{onClick:()=>setConfirmar(false),className:"border text-gray-500 text-sm px-4 py-2 rounded-xl"},"Cancelar")
+              )
+            )
+          : React.createElement('button',{onClick:()=>setConfirmar(true),className:"w-full text-red-400 text-sm py-2"},"Eliminar esta canción")
+      )
+    )
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────
+function App() {
+  const [canciones,setCanciones]=useState(null);
+  const [selected,setSelected]=useState(null);
+  const [showNueva,setShowNueva]=useState(false);
+  const [nombreNueva,setNombreNueva]=useState("");
+  const [filtro,setFiltro]=useState("Todas");
+
+  useEffect(()=>{
+    const c=cargar("salita-gh-canciones",DEFAULT);
+    setCanciones(c);
+  },[]);
+
+  useEffect(()=>{if(canciones)guardar("salita-gh-canciones",canciones);},[canciones]);
+
+  const saveSong=u=>{setCanciones(p=>p.map(c=>c.id===u.id?u:c));setSelected(u);};
+  const deleteSong=id=>{setCanciones(p=>p.filter(c=>c.id!==id));setSelected(null);};
+  const crearCancion=()=>{
+    if(!nombreNueva.trim())return;
+    const n={...FICHA_VACIA,id:Date.now(),nombre:nombreNueva};
+    setCanciones(p=>[...p,n]);setNombreNueva("");setShowNueva(false);setSelected(n);
+  };
+
+  if(!canciones)return React.createElement('div',{className:"min-h-screen flex items-center justify-center bg-yellow-50"},
+    React.createElement('div',{className:"text-center"},
+      React.createElement('div',{className:"text-5xl mb-3"},"🪗"),
+      React.createElement('p',{className:"text-yellow-700 font-medium"},"Cargando...")
+    )
+  );
+
+  if(selected)return React.createElement(Ficha,{cancion:selected,onSave:saveSong,onBack:()=>setSelected(null),onDelete:deleteSong});
+
+  const filtradas=filtro==="Todas"?canciones:canciones.filter(c=>c.estado===filtro);
+
+  return React.createElement('div',{className:"min-h-screen pb-8",style:{background:"#fffbf0"}},
+    React.createElement('div',{style:{background:"#78350f"},className:"text-white px-4 py-5"},
+      React.createElement('div',{className:"max-w-xl mx-auto"},
+        React.createElement('div',{className:"text-3xl mb-1"},"🪗"),
+        React.createElement('h1',{className:"text-2xl font-bold",style:{color:"#fef3c7"}},"Salita de Ensayo"),
+        React.createElement('p',{style:{color:"#fcd34d"},className:"text-sm"},"Modesto Chaleca")
+      )
+    ),
+    React.createElement('div',{className:"max-w-xl mx-auto px-4 py-4 space-y-4"},
+      // Filtros
+      React.createElement('div',{className:"flex gap-2 overflow-x-auto pb-1"},
+        ["Todas",...ESTADOS].map(e=>React.createElement('button',{key:e,onClick:()=>setFiltro(e),
+          className:`text-xs px-3 py-1 rounded-full whitespace-nowrap font-medium border ${filtro===e?"bg-yellow-500 text-white border-yellow-500":"bg-white text-gray-500 border-gray-200"}`},
+          e,e!=="Todas"&&React.createElement('span',{className:"ml-1 opacity-60"},`(${canciones.filter(c=>c.estado===e).length})`)
+        ))
+      ),
+      // Nueva canción
+      showNueva
+        ? React.createElement('div',{className:"bg-white rounded-2xl p-4 shadow-sm flex gap-2"},
+            React.createElement('input',{autoFocus:true,placeholder:"Nombre de la canción...",value:nombreNueva,
+              onChange:e=>setNombreNueva(e.target.value),onKeyDown:e=>e.key==="Enter"&&crearCancion(),
+              className:"flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm",style:{outline:"none"}}),
+            React.createElement('button',{onClick:crearCancion,className:"bg-yellow-500 text-white rounded-xl px-4 py-2 text-sm font-bold"},"Crear"),
+            React.createElement('button',{onClick:()=>setShowNueva(false),className:"text-gray-400 border rounded-xl px-3 py-2 text-sm"},"✕")
+          )
+        : React.createElement('button',{onClick:()=>setShowNueva(true),className:"w-full bg-yellow-500 text-white rounded-2xl py-3 font-bold text-base"},"+ Nueva canción"),
+      // Lista
+      filtradas.length===0&&React.createElement('p',{className:"text-center text-gray-400 text-sm py-8"},"No hay canciones en este estado."),
+      ...filtradas.map(c=>React.createElement('div',{key:c.id,onClick:()=>setSelected(c),
+        className:"bg-white rounded-2xl p-4 shadow-sm cursor-pointer border border-transparent",
+        style:{transition:"box-shadow 0.2s"}},
+        React.createElement('div',{className:"flex justify-between items-start mb-2"},
+          React.createElement('h3',{className:"font-bold text-gray-800 text-base"},c.nombre),
+          React.createElement('span',{className:`text-xs px-2 py-1 rounded-full font-medium ml-2 ${ESTADO_CLASS[c.estado]}`},c.estado)
+        ),
+        React.createElement('div',{className:"flex gap-3 text-xs text-gray-400 mb-2 flex-wrap"},
+          c.estilo&&React.createElement('span',null,"🎵 ",c.estilo),
+          c.tempo&&React.createElement('span',null,"⏱ ",c.tempo),
+          c.tonalidad&&React.createElement('span',null,"🎼 ",c.tonalidad)
+        ),
+        c.instrumentos.length>0&&React.createElement('div',{className:"flex flex-wrap gap-1 mb-2"},
+          c.instrumentos.slice(0,4).map(i=>React.createElement('span',{key:i,className:"text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full"},i)),
+          c.instrumentos.length>4&&React.createElement('span',{className:"text-xs text-gray-400 px-1"},`+${c.instrumentos.length-4} más`)
+        ),
+        c.queFalta&&React.createElement('p',{className:"text-xs text-gray-400 truncate"},"⚠️ ",c.queFalta)
+      ))
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
