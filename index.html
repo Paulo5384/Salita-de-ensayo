@@ -163,15 +163,15 @@ const CATS={"Voces":["Voz principal","Segunda voz"],"Cuerdas":["Guitarra de palo
 const TODOS_INSTR=Object.values(CATS).flat();
 
 // ── Claude API ──
-async function callClaude(apiKey, messages, system) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
+async function callOpenAI(apiKey, messages, system) {
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method:"POST",
-    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:2000,system,messages})
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},
+    body:JSON.stringify({model:"gpt-4o-mini",max_tokens:2000,messages:[{role:"system",content:system},...messages.map(m=>({role:m.role==="bot"?"assistant":"user",content:m.content||m.text}))]})
   });
   const data = await res.json();
   if(data.error) throw new Error(data.error.message);
-  return data.content[0].text;
+  return data.choices[0].message.content;
 }
 
 const SYSTEM_FICHA = `Eres un asistente para la app "Salita de Ensayo" del grupo musical Modesto Chaleca.
@@ -262,7 +262,7 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
     setInput("");setLoading(true);
     try{
       const history=[...msgs.filter(m=>m.role!=="bot"||!m.thinking).map(m=>({role:m.role==="bot"?"assistant":"user",content:m.text})),{role:"user",content:texto}];
-      const resp=await callClaude(apiKey,history,SYSTEM_FICHA);
+      const resp=await callOpenAI(apiKey,history,SYSTEM_FICHA);
       const json=parseJSON(resp);
       setMsgs(p=>[...p.slice(0,-1),{role:"bot",text:json?"He extraído la información. Revisa el resumen abajo y confirma si está correcto.":"No pude extraer la información. ¿Puedes darme más detalles?"}]);
       if(json)setPreview(json);
@@ -275,7 +275,7 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
     setLoading(true);
     setMsgs([{role:"bot",text:"Procesando el archivo..."}]);
     try{
-      const resp=await callClaude(apiKey,[{role:"user",content:"Extrae la información musical de este texto:\n\n"+txt}],SYSTEM_FICHA);
+      const resp=await callOpenAI(apiKey,[{role:"user",content:"Extrae la información musical de este texto:\n\n"+txt}],SYSTEM_FICHA);
       const json=parseJSON(resp);
       setMsgs([{role:"bot",text:json?"¡Listo! Extraje la información del archivo. Revisa el resumen.":"No pude procesar el archivo."}]);
       if(json)setPreview(json);
@@ -363,8 +363,8 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
         </div>
         <div className="modal-body">
           <div className="api-config">
-            <label>API Key de Claude (Anthropic)</label>
-            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="sk-ant-..."/>
+            <label>API Key de OpenAI (ChatGPT)</label>
+            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="sk-..."/>
           </div>
           <div className="ia-tabs">
             <button className={`ia-tab${tab==="chat"?" active":""}`} onClick={()=>setTab("chat")}>💬 Chat / Voz</button>
