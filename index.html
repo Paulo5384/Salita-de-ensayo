@@ -92,31 +92,25 @@ textarea{resize:none;}
 .loading{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fffbf0;}
 .sync-dot{display:inline-block;width:8px;height:8px;background:#fcd34d;border-radius:50%;margin-left:8px;animation:blink 1s infinite;}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
-
-/* ── VISTA LETRA FULL SCREEN ── */
+/* Letra full screen */
 .letra-fs{position:fixed;inset:0;background:#1a1a2e;z-index:300;display:flex;flex-direction:column;}
 .letra-fs-header{background:#78350f;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
 .letra-fs-header h2{flex:1;color:#fef3c7;font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .letra-fs-body{flex:1;overflow-y:auto;padding:20px 16px;}
 .letra-fs-controls{background:#111827;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
-.transp-label{color:#9ca3af;font-size:12px;margin-right:4px;}
-.transp-val{color:#f59e0b;font-size:14px;font-weight:700;min-width:32px;text-align:center;}
-.btn-transp{background:#374151;color:white;border-radius:8px;padding:6px 14px;font-size:18px;font-weight:700;}
-.btn-reset{background:#374151;color:#9ca3af;border-radius:8px;padding:6px 10px;font-size:12px;}
-.btn-instrumento{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #374151;background:#1f2937;color:#9ca3af;}
-.btn-instrumento.active{background:#f59e0b;color:white;border-color:#f59e0b;}
-
-/* Render de letra en cancionero */
+.transp-label{color:#9ca3af;font-size:12px;}
+.transp-val{color:#f59e0b;font-size:16px;font-weight:700;min-width:36px;text-align:center;}
+.btn-transp{background:#374151;color:white;border-radius:8px;padding:6px 16px;font-size:20px;font-weight:700;line-height:1;}
+.btn-reset{background:#374151;color:#9ca3af;border-radius:8px;padding:6px 12px;font-size:12px;}
+.btn-guitalele{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #374151;background:#1f2937;color:#9ca3af;}
+.btn-guitalele.on{background:#f59e0b;color:white;border-color:#f59e0b;}
 .cancionero{font-family:'Courier New',monospace;}
-.cancionero-bloque{margin-bottom:24px;}
-.cancionero-linea{display:block;margin-bottom:0;}
-.cancionero-acordes{display:block;color:#f59e0b;font-size:14px;font-weight:700;letter-spacing:0.02em;white-space:pre;line-height:1.4;min-height:1.4em;}
-.cancionero-texto{display:block;color:#e5e7eb;font-size:15px;white-space:pre;line-height:1.6;}
-.cancionero-seccion{color:#7c3aed;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;margin-top:4px;}
-
-/* Botón ver letra en ficha */
-.btn-ver-letra{width:100%;background:#1a1a2e;color:#f59e0b;border-radius:16px;padding:12px;font-size:15px;font-weight:700;border:2px solid #374151;margin-bottom:8px;}
-
+.c-bloque{margin-bottom:28px;}
+.c-seccion{display:block;color:#a78bfa;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;}
+.c-par{display:block;margin-bottom:4px;}
+.c-acordes{display:block;color:#f59e0b;font-size:14px;font-weight:700;white-space:pre;line-height:1.3;min-height:18px;}
+.c-texto{display:block;color:#e5e7eb;font-size:15px;white-space:pre;line-height:1.6;}
+.btn-ver-letra{width:100%;background:#1a1a2e;color:#f59e0b;border-radius:16px;padding:12px;font-size:15px;font-weight:700;border:2px solid #374151;margin-bottom:12px;}
 /* Modal IA */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;}
 .modal-sheet{background:white;border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
@@ -138,7 +132,6 @@ textarea{resize:none;}
 .preview-box h3{font-size:14px;font-weight:700;color:#15803d;margin-bottom:8px;}
 .preview-row{display:flex;gap:8px;margin-bottom:4px;font-size:13px;}
 .preview-row .lbl{color:#9ca3af;min-width:80px;font-weight:600;flex-shrink:0;}
-.preview-row .val{color:#1f2937;}
 .btn-apply{width:100%;background:#7c3aed;color:white;border-radius:16px;padding:12px;font-size:15px;font-weight:700;margin-top:12px;}
 .upload-zone{border:2px dashed #ddd6fe;border-radius:16px;padding:24px;text-align:center;cursor:pointer;background:#faf5ff;margin-bottom:12px;}
 .upload-zone p{font-size:14px;color:#7c3aed;font-weight:600;margin-top:8px;}
@@ -165,89 +158,84 @@ const db=firebase.firestore();
 <script type="text/babel">
 const {useState,useEffect,useRef}=React;
 
-// ── Transposición ──
+// ── Transposición (probada para + y - y bemoles) ──
 const NOTAS=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const ALIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
+
 function trAcorde(a,st){
   const m=a.match(/^([A-G][b#]?)(.*)$/);
   if(!m)return a;
   const base=ALIAS[m[1]]||m[1];
   const idx=NOTAS.indexOf(base);
   if(idx<0)return a;
-  return NOTAS[(idx+st+120)%12]+m[2];
+  return NOTAS[((idx+st)%12+12)%12]+m[2];
 }
+
 function trTexto(txt,st){
-  if(!txt||st===0)return txt;
+  if(!txt)return "";
+  // Siempre pasa por la función, incluso con st=0, para consistencia
   return txt.replace(/\[([^\]]+)\]/g,(_,a)=>`[${trAcorde(a,st)}]`);
 }
 
-// ── Parser de letra para cancionero ──
-// Convierte "[Am]cuando la [G]lluvia" en línea de acordes + línea de texto alineados
+// ── Parser cancionero: acordes encima de sílabas ──
 function parsearLetra(texto){
   if(!texto)return[];
   const lineas=texto.split("\n");
   const bloques=[];
   let bloque=[];
 
-  for(let i=0;i<lineas.length;i++){
-    const lin=lineas[i];
-    // Línea vacía → separador de bloque
-    if(!lin.trim()){
-      if(bloque.length)bloques.push(bloque);
-      bloque=[];
-      continue;
-    }
-    // Detectar sección (Coro:, Estrofa 1:, etc.)
-    if(/^(coro|estrofa|puente|intro|outro|verso|pre-?coro)/i.test(lin.trim())&&!lin.includes("[")){
+  const flush=()=>{if(bloque.length){bloques.push([...bloque]);bloque=[];}};
+
+  for(const lin of lineas){
+    if(!lin.trim()){flush();continue;}
+    // Sección (Coro:, Estrofa 1, etc.) sin acordes
+    if(/^(coro|estrofa|puente|intro|outro|verso|pre.?coro)/i.test(lin.trim())&&!lin.includes("[")){
       bloque.push({tipo:"seccion",txt:lin.trim()});
       continue;
     }
-    // ¿Tiene acordes?
     if(lin.includes("[")){
-      // Construir línea de acordes y línea de texto alineadas
-      let acordes="";
-      let letratxt="";
-      let i2=0;
-      while(i2<lin.length){
-        if(lin[i2]==="["){
-          const fin=lin.indexOf("]",i2);
+      let acordesStr="";
+      let textoStr="";
+      let i=0;
+      while(i<lin.length){
+        if(lin[i]==="["){
+          const fin=lin.indexOf("]",i);
           if(fin>-1){
-            const acorde=lin.slice(i2+1,fin);
-            // El acorde va encima de la posición actual en letratxt
-            const pos=letratxt.length;
-            // Rellenar acordes hasta la posición
-            while(acordes.length<pos)acordes+=" ";
-            acordes+=acorde;
-            i2=fin+1;
-          } else {i2++;}
+            const acorde=lin.slice(i+1,fin);
+            // Rellenar espacios en acordesStr hasta la posición actual en textoStr
+            while(acordesStr.length<textoStr.length)acordesStr+=" ";
+            acordesStr+=acorde;
+            i=fin+1;
+          } else i++;
         } else {
-          letratxt+=lin[i2];
-          i2++;
+          textoStr+=lin[i];
+          i++;
         }
       }
-      bloque.push({tipo:"linea",acordes,texto:letratxt});
+      bloque.push({tipo:"linea",acordes:acordesStr,texto:textoStr});
     } else {
       bloque.push({tipo:"linea",acordes:"",texto:lin});
     }
   }
-  if(bloque.length)bloques.push(bloque);
+  flush();
   return bloques;
 }
 
-function Cancionero({texto,semitonos}){
-  const textoTr=trTexto(texto,semitonos);
-  const bloques=parsearLetra(textoTr);
+function Cancionero({texto,st}){
+  // Primero transponemos el texto completo, luego parseamos
+  const txtTr=trTexto(texto,st);
+  const bloques=parsearLetra(txtTr);
   if(!bloques.length)return<p style={{color:"#6b7280",fontStyle:"italic"}}>Sin letra cargada</p>;
   return(
     <div className="cancionero">
       {bloques.map((bloque,bi)=>(
-        <div key={bi} className="cancionero-bloque">
+        <div key={bi} className="c-bloque">
           {bloque.map((lin,li)=>{
-            if(lin.tipo==="seccion")return<span key={li} className="cancionero-seccion">{lin.txt}</span>;
+            if(lin.tipo==="seccion")return<span key={li} className="c-seccion">{lin.txt}</span>;
             return(
-              <span key={li} className="cancionero-linea">
-                <span className="cancionero-acordes">{lin.acordes||" "}</span>
-                <span className="cancionero-texto">{lin.texto}</span>
+              <span key={li} className="c-par">
+                <span className="c-acordes">{lin.acordes||" "}</span>
+                <span className="c-texto">{lin.texto||" "}</span>
               </span>
             );
           })}
@@ -257,26 +245,29 @@ function Cancionero({texto,semitonos}){
   );
 }
 
-// ── Vista Letra Pantalla Completa ──
 function LetraFullScreen({cancion,onClose}){
   const[st,setSt]=useState(0);
-  const instrumento=st===5?"Guitalele":"Guitarra";
+  const subir=()=>setSt(s=>s+1);
+  const bajar=()=>setSt(s=>s-1);
+  const reset=()=>setSt(0);
+  const toggleGuitalele=()=>setSt(s=>s===5?0:5);
+
   return(
     <div className="letra-fs">
       <div className="letra-fs-header">
-        <button onClick={onClose} style={{background:"none",color:"#fcd34d",fontSize:22}}>✕</button>
+        <button onClick={onClose} style={{background:"none",color:"#fcd34d",fontSize:22,padding:"0 4px"}}>✕</button>
         <h2>{cancion.nombre}</h2>
       </div>
       <div className="letra-fs-body">
-        <Cancionero texto={cancion.letra||""} semitonos={st}/>
+        <Cancionero texto={cancion.letra||""} st={st}/>
       </div>
       <div className="letra-fs-controls">
         <span className="transp-label">Tono:</span>
-        <button className="btn-transp" onClick={()=>setSt(s=>s-1)}>−</button>
-        <span className="transp-val">{st>0?"+":""}{st}</span>
-        <button className="btn-transp" onClick={()=>setSt(s=>s+1)}>+</button>
-        <button className="btn-reset" onClick={()=>setSt(0)}>Reset</button>
-        <button className={`btn-instrumento${st===5?" active":""}`} onClick={()=>setSt(s=>s===5?0:5)}>
+        <button className="btn-transp" onClick={bajar}>−</button>
+        <span className="transp-val">{st>0?`+${st}`:st}</span>
+        <button className="btn-transp" onClick={subir}>+</button>
+        <button className="btn-reset" onClick={reset}>0</button>
+        <button className={`btn-guitalele${st===5?" on":""}`} onClick={toggleGuitalele}>
           {st===5?"🎵 Guitalele":"🎸 Guitarra"}
         </button>
       </div>
@@ -284,7 +275,6 @@ function LetraFullScreen({cancion,onClose}){
   );
 }
 
-// ── Editor letra ──
 function EditorLetra({value,onChange}){
   const[ac,setAc]=useState("");
   const ins=()=>{
@@ -303,7 +293,8 @@ function EditorLetra({value,onChange}){
     </div>
     <p className="acorde-hint">Posiciona el cursor en la sílaba y presiona ↵.</p>
     <textarea id="eta" value={value} onChange={e=>onChange(e.target.value)} rows={12}
-      placeholder={"[Am]Cuando la [G]lluvia ca[Dm]yó\n[F]ejemplo de letra cifrada"} className="field-textarea" style={{fontFamily:"monospace",fontSize:13}}/>
+      placeholder={"[Am]Cuando la [G]lluvia ca[Dm]yó\n[F]ejemplo de letra cifrada"}
+      className="field-textarea" style={{fontFamily:"monospace",fontSize:13}}/>
   </div>);
 }
 
@@ -320,11 +311,16 @@ function Campo({label,value,onChange,multiline,placeholder,editando}){
 
 const ESTADOS=["Idea","En desarrollo","Casi lista","Terminada"];
 const BADGE={"Idea":"badge badge-idea","En desarrollo":"badge badge-dev","Casi lista":"badge badge-almost","Terminada":"badge badge-done"};
-const CATS={"Voces":["Voz principal","Segunda voz"],"Cuerdas":["Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele"],"Bajos":["Bajo","Ubass"],"Teclados / Viento":["Teclado","Acordeón"],"Percusión":["Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"]};
+const CATS={
+  "Voces":["Voz principal","Segunda voz"],
+  "Cuerdas":["Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele"],
+  "Bajos":["Bajo","Ubass"],
+  "Teclados / Viento":["Teclado","Acordeón"],
+  "Percusión":["Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"]
+};
 const TODOS=Object.values(CATS).flat();
 const EMPTY={nombre:"",estado:"Idea",estilo:"",tempo:"",tonalidad:"",instrumentos:[],letra:"",audioUrl:"",queFalta:"",notasEnsayo:""};
 
-// ── Ficha ──
 function Ficha({cancion,onSave,onBack,onDelete}){
   const[data,setData]=useState({...EMPTY,...cancion});
   const[editando,setEditando]=useState(!cancion.nombre);
@@ -333,7 +329,10 @@ function Ficha({cancion,onSave,onBack,onDelete}){
   const[saving,setSaving]=useState(false);
   const[verLetra,setVerLetra]=useState(false);
   const set=(k,v)=>setData(d=>({...d,[k]:v}));
-  const togI=i=>set("instrumentos",(data.instrumentos||[]).includes(i)?(data.instrumentos||[]).filter(x=>x!==i):[...(data.instrumentos||[]),i]);
+  const togI=i=>{
+    const cur=data.instrumentos||[];
+    set("instrumentos",cur.includes(i)?cur.filter(x=>x!==i):[...cur,i]);
+  };
   const guardar=async()=>{setSaving(true);await onSave(data);setSaving(false);setEditando(false);};
   const extras=(data.instrumentos||[]).filter(i=>!TODOS.includes(i));
   const getEmbed=url=>{
@@ -364,7 +363,10 @@ function Ficha({cancion,onSave,onBack,onDelete}){
         <div className="ficha-section">
           {editando?(
             <div>
-              <div style={{marginBottom:10}}><label className="field-label">Nombre</label><input value={data.nombre||""} onChange={e=>set("nombre",e.target.value)} placeholder="Nombre de la canción" className="field-input"/></div>
+              <div style={{marginBottom:10}}>
+                <label className="field-label">Nombre</label>
+                <input value={data.nombre||""} onChange={e=>set("nombre",e.target.value)} placeholder="Nombre de la canción" className="field-input"/>
+              </div>
               <div className="ficha-grid">
                 <div><label className="field-label">Estado</label><select value={data.estado||"Idea"} onChange={e=>set("estado",e.target.value)} className="field-select">{ESTADOS.map(e=><option key={e}>{e}</option>)}</select></div>
                 <div><label className="field-label">Estilo</label><input value={data.estilo||""} onChange={e=>set("estilo",e.target.value)} placeholder="Cumbia..." className="field-input"/></div>
@@ -381,7 +383,6 @@ function Ficha({cancion,onSave,onBack,onDelete}){
           )}
         </div>
 
-        {/* Botón ver letra */}
         {!editando&&(data.letra||"").trim()&&(
           <button className="btn-ver-letra" onClick={()=>setVerLetra(true)}>🎵 Ver letra y acordes</button>
         )}
@@ -391,11 +392,15 @@ function Ficha({cancion,onSave,onBack,onDelete}){
           {editando?(
             <div>
               {Object.entries(CATS).map(([cat,ins])=>(
-                <div key={cat}><p className="instr-cat">{cat}</p><div className="instr-tags">{ins.map(i=><button key={i} onClick={()=>togI(i)} className={`instr-btn${(data.instrumentos||[]).includes(i)?" active":""}`}>{i}</button>)}</div></div>
+                <div key={cat}>
+                  <p className="instr-cat">{cat}</p>
+                  <div className="instr-tags">{ins.map(i=><button key={i} onClick={()=>togI(i)} className={`instr-btn${(data.instrumentos||[]).includes(i)?" active":""}`}>{i}</button>)}</div>
+                </div>
               ))}
               {extras.length>0&&<div><p className="instr-cat">Otros</p><div className="instr-tags">{extras.map(i=><button key={i} onClick={()=>togI(i)} className="instr-btn active">{i}</button>)}</div></div>}
               <div className="instr-add-row">
-                <input placeholder="Otro instrumento..." value={newI} onChange={e=>setNewI(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&newI.trim()){togI(newI.trim());setNewI("");}}}/>
+                <input placeholder="Otro instrumento..." value={newI} onChange={e=>setNewI(e.target.value)}
+                  onKeyDown={e=>{if(e.key==="Enter"&&newI.trim()){togI(newI.trim());setNewI("");}}}/>
                 <button onClick={()=>{if(newI.trim()){togI(newI.trim());setNewI("");}}}>+</button>
               </div>
             </div>
@@ -428,7 +433,13 @@ function Ficha({cancion,onSave,onBack,onDelete}){
 
         <div className="eliminar-zone">
           {confirm
-            ?<div className="confirm-box"><p>¿Eliminar "{data.nombre}"?</p><div className="confirm-row"><button className="btn-confirm-yes" onClick={()=>onDelete(data.id)}>Sí, eliminar</button><button className="btn-confirm-no" onClick={()=>setConfirm(false)}>Cancelar</button></div></div>
+            ?<div className="confirm-box">
+               <p>¿Eliminar "{data.nombre}"?</p>
+               <div className="confirm-row">
+                 <button className="btn-confirm-yes" onClick={()=>onDelete(data.id)}>Sí, eliminar</button>
+                 <button className="btn-confirm-no" onClick={()=>setConfirm(false)}>Cancelar</button>
+               </div>
+             </div>
             :<button className="btn-eliminar" onClick={()=>setConfirm(true)}>Eliminar esta canción</button>}
         </div>
       </div>
@@ -436,11 +447,11 @@ function Ficha({cancion,onSave,onBack,onDelete}){
   );
 }
 
-// ── Modal IA ──
+// ── IA ──
 const SYSTEM=`Eres un asistente para la app "Salita de Ensayo" del grupo Modesto Chaleca.
-Extrae información musical y devuelve SOLO un JSON válido con esta estructura exacta:
+Extrae información musical y devuelve SOLO un JSON válido con esta estructura exacta, sin texto adicional ni backticks:
 {"nombre":"","estado":"Idea","estilo":"","tempo":"","tonalidad":"","instrumentos":[],"letra":"","queFalta":"","notasEnsayo":"","audioUrl":""}
-Para la letra: usa formato [Acorde]sílaba. Sin texto adicional ni backticks.`;
+Para la letra usa formato [Acorde]sílaba. Ejemplo: [Am]Cuan[G]do la llu[Dm]via ca[F]yó`;
 
 async function callAI(apiKey,txt){
   const r=await fetch("https://api.openai.com/v1/chat/completions",{
@@ -452,7 +463,10 @@ async function callAI(apiKey,txt){
   if(d.error)throw new Error(d.error.message);
   return d.choices[0].message.content;
 }
-function parseJSON(txt){try{return JSON.parse(txt.replace(/```json|```/g,"").trim());}catch{return null;}}
+
+function parseJSON(txt){
+  try{return JSON.parse(txt.replace(/```json|```/g,"").trim());}catch{return null;}
+}
 
 function IAModal({onClose,onCrear,apiKey,setApiKey}){
   const[tab,setTab]=useState("chat");
@@ -510,12 +524,12 @@ function IAModal({onClose,onCrear,apiKey,setApiKey}){
         txt=await file.text();
       }
       await procesarTexto(txt);
-    }catch(e){setMsgs([{bot:true,txt:"Error leyendo archivo: "+e.message}]);}
+    }catch(e){setMsgs([{bot:true,txt:"Error: "+e.message}]);}
   };
 
   const startSpeech=()=>{
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){alert("Usa Chrome para voz.");return;}
+    if(!SR){alert("Usa Chrome para reconocimiento de voz.");return;}
     const r=new SR();r.lang="es-CL";r.continuous=false;r.interimResults=false;
     r.onresult=e=>setInput(p=>(p+" "+e.results[0][0].transcript).trim());
     r.onend=()=>setRec(false);r.onerror=()=>setRec(false);
@@ -526,7 +540,8 @@ function IAModal({onClose,onCrear,apiKey,setApiKey}){
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="modal-sheet">
         <div className="modal-header">
-          <span style={{fontSize:24}}>✨</span><h2>Asistente IA</h2>
+          <span style={{fontSize:24}}>✨</span>
+          <h2>Asistente IA</h2>
           <button onClick={onClose} style={{background:"none",color:"white",fontSize:22}}>✕</button>
         </div>
         <div className="modal-body">
@@ -542,7 +557,9 @@ function IAModal({onClose,onCrear,apiKey,setApiKey}){
           {tab==="archivo"&&(
             <div className="upload-zone" onClick={()=>document.getElementById("finp").click()}
               onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)leerArchivo(f);}}>
-              <div style={{fontSize:36}}>📄</div><p>Toca para subir un archivo</p><span>.txt · .docx · .pdf</span>
+              <div style={{fontSize:36}}>📄</div>
+              <p>Toca para subir un archivo</p>
+              <span>.txt · .docx · .pdf</span>
               <input id="finp" type="file" accept=".txt,.docx,.pdf" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)leerArchivo(f);e.target.value="";}}/>
             </div>
           )}
@@ -552,9 +569,9 @@ function IAModal({onClose,onCrear,apiKey,setApiKey}){
             <div className="preview-box">
               <h3>✅ Canción detectada</h3>
               {[["Nombre",preview.nombre],["Estado",preview.estado],["Estilo",preview.estilo],["Tempo",preview.tempo],["Tonalidad",preview.tonalidad],["Instrumentos",(preview.instrumentos||[]).join(", ")],["Qué falta",preview.queFalta]].filter(([,v])=>v).map(([l,v])=>(
-                <div key={l} className="preview-row"><span className="lbl">{l}</span><span className="val">{v}</span></div>
+                <div key={l} className="preview-row"><span className="lbl">{l}</span><span style={{color:"#1f2937",fontSize:13}}>{v}</span></div>
               ))}
-              {preview.letra&&<div className="preview-row"><span className="lbl">Letra</span><span className="val" style={{fontSize:12,color:"#6b7280"}}>{preview.letra.slice(0,80)}…</span></div>}
+              {preview.letra&&<div className="preview-row"><span className="lbl">Letra</span><span style={{fontSize:12,color:"#6b7280"}}>{preview.letra.slice(0,80)}…</span></div>}
               <button className="btn-apply" onClick={()=>{onCrear(preview);onClose();}}>➕ Agregar a la Salita</button>
             </div>
           )}
@@ -574,7 +591,7 @@ function IAModal({onClose,onCrear,apiKey,setApiKey}){
   );
 }
 
-// ── App ──
+// ── App principal ──
 function App(){
   const[canciones,setCanciones]=useState(null);
   const[selected,setSelected]=useState(null);
@@ -627,14 +644,20 @@ function App(){
     setSyncing(true);
     try{
       const n={
-        nombre:data.nombre||"Sin nombre",estado:data.estado||"Idea",estilo:data.estilo||"",
-        tempo:data.tempo||"",tonalidad:data.tonalidad||"",
+        nombre:data.nombre||"Sin nombre",
+        estado:data.estado||"Idea",
+        estilo:data.estilo||"",
+        tempo:data.tempo||"",
+        tonalidad:data.tonalidad||"",
         instrumentos:Array.isArray(data.instrumentos)?data.instrumentos:[],
-        letra:data.letra||"",audioUrl:data.audioUrl||"",
-        queFalta:data.queFalta||"",notasEnsayo:data.notasEnsayo||"",
+        letra:data.letra||"",
+        audioUrl:data.audioUrl||"",
+        queFalta:data.queFalta||"",
+        notasEnsayo:data.notasEnsayo||"",
         createdAt:firebase.firestore.FieldValue.serverTimestamp()
       };
       const ref=await db.collection("canciones").add(n);
+      // Abrir ficha sin el Timestamp que causa crash
       const{createdAt,...sinTS}=n;
       setSelected({id:ref.id,...sinTS});
     }catch(e){console.error(e);}
@@ -642,7 +665,12 @@ function App(){
   };
 
   if(canciones===null)return(
-    <div className="loading"><div style={{textAlign:"center"}}><div style={{fontSize:48}}>🪗</div><p style={{color:"#92400e",fontWeight:600,marginTop:8}}>Cargando Salita...</p></div></div>
+    <div className="loading">
+      <div style={{textAlign:"center"}}>
+        <div style={{fontSize:48}}>🪗</div>
+        <p style={{color:"#92400e",fontWeight:600,marginTop:8}}>Cargando Salita...</p>
+      </div>
+    </div>
   );
 
   if(selected){
@@ -673,7 +701,9 @@ function App(){
         <button className="btn-ia" onClick={()=>setShowIA(true)}>✨ Agregar canción con IA</button>
         {showNueva?(
           <div className="nueva-input-row">
-            <input autoFocus placeholder="Nombre de la canción..." value={nombreNueva} onChange={e=>setNombreNueva(e.target.value)} onKeyDown={e=>e.key==="Enter"&&crearManual(nombreNueva)}/>
+            <input autoFocus placeholder="Nombre de la canción..." value={nombreNueva}
+              onChange={e=>setNombreNueva(e.target.value)}
+              onKeyDown={e=>e.key==="Enter"&&crearManual(nombreNueva)}/>
             <button className="btn-crear" onClick={()=>crearManual(nombreNueva)}>Crear</button>
             <button className="btn-cancelar" onClick={()=>setShowNueva(false)}>✕</button>
           </div>
@@ -681,9 +711,21 @@ function App(){
         {filtradas.length===0&&<p className="empty-msg">{canciones.length===0?"¡Aún no hay canciones!":"No hay canciones en este estado."}</p>}
         {filtradas.map(c=>(
           <div key={c.id} className="song-card" onClick={()=>setSelected(c)}>
-            <div className="song-card-top"><h3>{c.nombre}</h3><span className={BADGE[c.estado]||"badge badge-idea"}>{c.estado}</span></div>
-            <div className="song-meta">{c.estilo&&<span>🎵 {c.estilo}</span>}{c.tempo&&<span>⏱ {c.tempo}</span>}{c.tonalidad&&<span>🎼 {c.tonalidad}</span>}</div>
-            {(c.instrumentos||[]).length>0&&<div className="tags">{(c.instrumentos||[]).slice(0,4).map(i=><span key={i} className="tag">{i}</span>)}{(c.instrumentos||[]).length>4&&<span style={{fontSize:12,color:"#9ca3af",padding:"3px 4px"}}>+{c.instrumentos.length-4} más</span>}</div>}
+            <div className="song-card-top">
+              <h3>{c.nombre}</h3>
+              <span className={BADGE[c.estado]||"badge badge-idea"}>{c.estado}</span>
+            </div>
+            <div className="song-meta">
+              {c.estilo&&<span>🎵 {c.estilo}</span>}
+              {c.tempo&&<span>⏱ {c.tempo}</span>}
+              {c.tonalidad&&<span>🎼 {c.tonalidad}</span>}
+            </div>
+            {(c.instrumentos||[]).length>0&&(
+              <div className="tags">
+                {(c.instrumentos||[]).slice(0,4).map(i=><span key={i} className="tag">{i}</span>)}
+                {(c.instrumentos||[]).length>4&&<span style={{fontSize:12,color:"#9ca3af",padding:"3px 4px"}}>+{c.instrumentos.length-4} más</span>}
+              </div>
+            )}
             {c.queFalta&&<p className="song-falta">⚠️ {c.queFalta}</p>}
           </div>
         ))}
