@@ -37,11 +37,11 @@ textarea{resize:none;}
 .song-card{background:white;border-radius:20px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.08);cursor:pointer;border:2px solid transparent;}
 .song-card:active{border-color:#f59e0b;}
 .song-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;gap:8px;}
-.song-card-top h3{font-size:16px;font-weight:700;color:#1f2937;}
+.song-card-top h3{font-size:16px;font-weight:700;}
 .song-meta{display:flex;gap:12px;font-size:12px;color:#9ca3af;margin-bottom:8px;flex-wrap:wrap;}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
 .tag{background:#fef3c7;color:#92400e;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
-.song-falta{font-size:12px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.song-falta{font-size:12px;color:#9ca3af;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .btn-new{width:100%;background:#f59e0b;color:white;border-radius:20px;padding:14px;font-size:16px;font-weight:700;margin-bottom:12px;}
 .btn-ia{width:100%;background:#7c3aed;color:white;border-radius:20px;padding:14px;font-size:16px;font-weight:700;margin-bottom:12px;}
 .filtros{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none;}
@@ -55,7 +55,6 @@ textarea{resize:none;}
 .btn-cancelar{background:white;color:#9ca3af;border:1.5px solid #e5e7eb;border-radius:12px;padding:8px 12px;font-size:14px;}
 .ficha-section{background:#fffbf0;border-radius:20px;padding:16px;margin-bottom:16px;}
 .ficha-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.ficha-grid.full{grid-template-columns:1fr;}
 .field-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#9ca3af;margin-bottom:4px;display:block;}
 .field-value{font-size:14px;color:#1f2937;line-height:1.5;white-space:pre-wrap;}
 .field-empty{color:#d1d5db;font-style:italic;}
@@ -74,20 +73,11 @@ textarea{resize:none;}
 .instr-add-row{display:flex;gap:8px;margin-top:8px;}
 .instr-add-row input{flex:1;border:1.5px solid #e5e7eb;border-radius:12px;padding:6px 12px;font-size:13px;outline:none;}
 .instr-add-row button{background:#f59e0b;color:white;border-radius:12px;padding:6px 14px;font-size:13px;font-weight:700;}
-.letra-wrap{font-size:14px;line-height:2;}
-.letra-linea{display:flex;flex-wrap:wrap;align-items:flex-end;margin-bottom:6px;}
-.letra-grupo{display:inline-flex;flex-direction:column;align-items:flex-start;margin-right:1px;}
-.letra-acorde{font-size:12px;font-weight:700;color:#d97706;line-height:1;min-height:14px;margin-bottom:2px;}
-.letra-texto{font-size:14px;color:#1f2937;white-space:pre;}
-.letra-plain{font-size:14px;color:#1f2937;}
 .acorde-bar{display:flex;gap:8px;align-items:center;background:#fef9c3;border:1.5px solid #fde68a;border-radius:12px;padding:8px 12px;margin-bottom:6px;}
 .acorde-bar span{font-size:12px;font-weight:600;color:#92400e;white-space:nowrap;}
-.acorde-bar input{flex:1;background:transparent;border:none;outline:none;font-size:14px;color:#1f2937;min-width:0;}
+.acorde-bar input{flex:1;background:transparent;border:none;outline:none;font-size:14px;min-width:0;}
 .acorde-bar button{background:#f59e0b;color:white;border-radius:8px;padding:4px 12px;font-size:13px;font-weight:700;}
 .acorde-hint{font-size:11px;color:#9ca3af;margin-bottom:6px;}
-.letra-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.btn-modo{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #e5e7eb;background:white;color:#6b7280;}
-.btn-modo.active{background:#f59e0b;color:white;border-color:#f59e0b;}
 .audio-iframe{width:100%;height:120px;border:none;border-radius:12px;display:block;margin-top:8px;}
 .divider{border:none;border-top:1.5px solid #f3f4f6;margin:16px 0;}
 .btn-guardar-big{width:100%;background:#f59e0b;color:white;border-radius:20px;padding:14px;font-size:16px;font-weight:700;margin-top:8px;margin-bottom:16px;}
@@ -100,8 +90,34 @@ textarea{resize:none;}
 .btn-confirm-no{background:white;color:#6b7280;border:1.5px solid #e5e7eb;border-radius:12px;padding:8px 20px;font-size:14px;}
 .empty-msg{text-align:center;color:#9ca3af;font-size:14px;padding:32px 0;}
 .loading{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#fffbf0;}
-.sync-dot{display:inline-block;width:8px;height:8px;background:#fcd34d;border-radius:50%;margin-left:8px;animation:pulse 1s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.sync-dot{display:inline-block;width:8px;height:8px;background:#fcd34d;border-radius:50%;margin-left:8px;animation:blink 1s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+/* ── VISTA LETRA FULL SCREEN ── */
+.letra-fs{position:fixed;inset:0;background:#1a1a2e;z-index:300;display:flex;flex-direction:column;}
+.letra-fs-header{background:#78350f;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.letra-fs-header h2{flex:1;color:#fef3c7;font-size:16px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.letra-fs-body{flex:1;overflow-y:auto;padding:20px 16px;}
+.letra-fs-controls{background:#111827;padding:10px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+.transp-label{color:#9ca3af;font-size:12px;margin-right:4px;}
+.transp-val{color:#f59e0b;font-size:14px;font-weight:700;min-width:32px;text-align:center;}
+.btn-transp{background:#374151;color:white;border-radius:8px;padding:6px 14px;font-size:18px;font-weight:700;}
+.btn-reset{background:#374151;color:#9ca3af;border-radius:8px;padding:6px 10px;font-size:12px;}
+.btn-instrumento{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #374151;background:#1f2937;color:#9ca3af;}
+.btn-instrumento.active{background:#f59e0b;color:white;border-color:#f59e0b;}
+
+/* Render de letra en cancionero */
+.cancionero{font-family:'Courier New',monospace;}
+.cancionero-bloque{margin-bottom:24px;}
+.cancionero-linea{display:block;margin-bottom:0;}
+.cancionero-acordes{display:block;color:#f59e0b;font-size:14px;font-weight:700;letter-spacing:0.02em;white-space:pre;line-height:1.4;min-height:1.4em;}
+.cancionero-texto{display:block;color:#e5e7eb;font-size:15px;white-space:pre;line-height:1.6;}
+.cancionero-seccion{color:#7c3aed;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;margin-top:4px;}
+
+/* Botón ver letra en ficha */
+.btn-ver-letra{width:100%;background:#1a1a2e;color:#f59e0b;border-radius:16px;padding:12px;font-size:15px;font-weight:700;border:2px solid #374151;margin-bottom:8px;}
+
+/* Modal IA */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;}
 .modal-sheet{background:white;border-radius:24px 24px 0 0;width:100%;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
 .modal-header{background:#7c3aed;color:white;padding:16px 20px;display:flex;align-items:center;gap:12px;}
@@ -115,7 +131,6 @@ textarea{resize:none;}
 .ia-msg-bot{background:#f9fafb;border-radius:16px 16px 16px 4px;padding:10px 14px;font-size:14px;margin-bottom:8px;margin-right:24px;border:1px solid #e5e7eb;}
 .ia-input-row{display:flex;gap:8px;align-items:flex-end;}
 .ia-input-row textarea{flex:1;border:1.5px solid #e5e7eb;border-radius:16px;padding:10px 14px;font-size:14px;outline:none;max-height:100px;}
-.ia-input-row textarea:focus{border-color:#7c3aed;}
 .btn-send{background:#7c3aed;color:white;border-radius:16px;padding:10px 16px;font-size:16px;}
 .btn-mic{background:#f3f0ff;color:#7c3aed;border-radius:16px;padding:10px 14px;font-size:18px;border:1.5px solid #ddd6fe;}
 .btn-mic.rec{background:#ef4444;color:white;border-color:#ef4444;}
@@ -150,66 +165,131 @@ const db=firebase.firestore();
 <script type="text/babel">
 const {useState,useEffect,useRef}=React;
 
+// ── Transposición ──
 const NOTAS=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const ALIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
-const trA=(a,st)=>{const m=a.match(/^([A-G][b#]?)(.*)$/);if(!m)return a;const n=ALIAS[m[1]]||m[1];const i=NOTAS.indexOf(n);return i<0?a:NOTAS[(i+st+12)%12]+m[2];};
-const trT=(t,st)=>t.replace(/\[([^\]]+)\]/g,(_,a)=>`[${trA(a,st)}]`);
-
-const ESTADOS=["Idea","En desarrollo","Casi lista","Terminada"];
-const BADGE={"Idea":"badge badge-idea","En desarrollo":"badge badge-dev","Casi lista":"badge badge-almost","Terminada":"badge badge-done"};
-const CATS={"Voces":["Voz principal","Segunda voz"],"Cuerdas":["Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele"],"Bajos":["Bajo","Ubass"],"Teclados / Viento":["Teclado","Acordeón"],"Percusión":["Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"]};
-const TODOS=Object.values(CATS).flat();
-
-const EMPTY_SONG={nombre:"",estado:"Idea",estilo:"",tempo:"",tonalidad:"",instrumentos:[],letra:"",audioUrl:"",queFalta:"",notasEnsayo:""};
-
-const SYSTEM=`Eres un asistente para la app "Salita de Ensayo" del grupo Modesto Chaleca.
-Extrae información musical y devuelve SOLO un JSON válido con esta estructura:
-{"nombre":"","estado":"Idea|En desarrollo|Casi lista|Terminada","estilo":"","tempo":"","tonalidad":"","instrumentos":[],"letra":"","queFalta":"","notasEnsayo":"","audioUrl":""}
-Para la letra: usa formato [Acorde]sílaba. Sin texto adicional ni backticks.`;
-
-async function callAI(apiKey, userText) {
-  const r = await fetch("https://api.openai.com/v1/chat/completions",{
-    method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},
-    body:JSON.stringify({model:"gpt-4o-mini",max_tokens:2000,messages:[{role:"system",content:SYSTEM},{role:"user",content:userText}]})
-  });
-  const d=await r.json();
-  if(d.error)throw new Error(d.error.message);
-  return d.choices[0].message.content;
+function trAcorde(a,st){
+  const m=a.match(/^([A-G][b#]?)(.*)$/);
+  if(!m)return a;
+  const base=ALIAS[m[1]]||m[1];
+  const idx=NOTAS.indexOf(base);
+  if(idx<0)return a;
+  return NOTAS[(idx+st+120)%12]+m[2];
+}
+function trTexto(txt,st){
+  if(!txt||st===0)return txt;
+  return txt.replace(/\[([^\]]+)\]/g,(_,a)=>`[${trAcorde(a,st)}]`);
 }
 
-function parseJSON(txt){
-  try{return JSON.parse(txt.replace(/```json|```/g,"").trim());}catch{return null;}
+// ── Parser de letra para cancionero ──
+// Convierte "[Am]cuando la [G]lluvia" en línea de acordes + línea de texto alineados
+function parsearLetra(texto){
+  if(!texto)return[];
+  const lineas=texto.split("\n");
+  const bloques=[];
+  let bloque=[];
+
+  for(let i=0;i<lineas.length;i++){
+    const lin=lineas[i];
+    // Línea vacía → separador de bloque
+    if(!lin.trim()){
+      if(bloque.length)bloques.push(bloque);
+      bloque=[];
+      continue;
+    }
+    // Detectar sección (Coro:, Estrofa 1:, etc.)
+    if(/^(coro|estrofa|puente|intro|outro|verso|pre-?coro)/i.test(lin.trim())&&!lin.includes("[")){
+      bloque.push({tipo:"seccion",txt:lin.trim()});
+      continue;
+    }
+    // ¿Tiene acordes?
+    if(lin.includes("[")){
+      // Construir línea de acordes y línea de texto alineadas
+      let acordes="";
+      let letratxt="";
+      let i2=0;
+      while(i2<lin.length){
+        if(lin[i2]==="["){
+          const fin=lin.indexOf("]",i2);
+          if(fin>-1){
+            const acorde=lin.slice(i2+1,fin);
+            // El acorde va encima de la posición actual en letratxt
+            const pos=letratxt.length;
+            // Rellenar acordes hasta la posición
+            while(acordes.length<pos)acordes+=" ";
+            acordes+=acorde;
+            i2=fin+1;
+          } else {i2++;}
+        } else {
+          letratxt+=lin[i2];
+          i2++;
+        }
+      }
+      bloque.push({tipo:"linea",acordes,texto:letratxt});
+    } else {
+      bloque.push({tipo:"linea",acordes:"",texto:lin});
+    }
+  }
+  if(bloque.length)bloques.push(bloque);
+  return bloques;
 }
 
-function LetraCifrada({texto}){
-  if(!texto)return <span className="field-empty">—</span>;
+function Cancionero({texto,semitonos}){
+  const textoTr=trTexto(texto,semitonos);
+  const bloques=parsearLetra(textoTr);
+  if(!bloques.length)return<p style={{color:"#6b7280",fontStyle:"italic"}}>Sin letra cargada</p>;
   return(
-    <div className="letra-wrap">
-      {texto.split("\n").map((lin,li)=>{
-        if(!lin.includes("["))return <div key={li} className="letra-plain">{lin||"\u00A0"}</div>;
-        const tok=[];let i=0;
-        while(i<lin.length){
-          if(lin[i]==="["){const e=lin.indexOf("]",i);if(e>-1){tok.push({t:"a",v:lin.slice(i+1,e)});i=e+1;}else{tok.push({t:"x",v:lin[i]});i++;}}
-          else{let j=i;while(j<lin.length&&lin[j]!=="[")j++;tok.push({t:"x",v:lin.slice(i,j)});i=j;}
-        }
-        const gr=[];let k=0;
-        while(k<tok.length){
-          if(tok[k].t==="a"){const tx=tok[k+1]?.t==="x"?tok[k+1].v:"";gr.push({a:tok[k].v,tx});k+=tok[k+1]?.t==="x"?2:1;}
-          else{gr.push({a:null,tx:tok[k].v});k++;}
-        }
-        return(<div key={li} className="letra-linea">{gr.map((g,gi)=>(<span key={gi} className="letra-grupo"><span className="letra-acorde">{g.a||""}</span><span className="letra-texto">{g.tx}</span></span>))}</div>);
-      })}
+    <div className="cancionero">
+      {bloques.map((bloque,bi)=>(
+        <div key={bi} className="cancionero-bloque">
+          {bloque.map((lin,li)=>{
+            if(lin.tipo==="seccion")return<span key={li} className="cancionero-seccion">{lin.txt}</span>;
+            return(
+              <span key={li} className="cancionero-linea">
+                <span className="cancionero-acordes">{lin.acordes||" "}</span>
+                <span className="cancionero-texto">{lin.texto}</span>
+              </span>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }
 
+// ── Vista Letra Pantalla Completa ──
+function LetraFullScreen({cancion,onClose}){
+  const[st,setSt]=useState(0);
+  const instrumento=st===5?"Guitalele":"Guitarra";
+  return(
+    <div className="letra-fs">
+      <div className="letra-fs-header">
+        <button onClick={onClose} style={{background:"none",color:"#fcd34d",fontSize:22}}>✕</button>
+        <h2>{cancion.nombre}</h2>
+      </div>
+      <div className="letra-fs-body">
+        <Cancionero texto={cancion.letra||""} semitonos={st}/>
+      </div>
+      <div className="letra-fs-controls">
+        <span className="transp-label">Tono:</span>
+        <button className="btn-transp" onClick={()=>setSt(s=>s-1)}>−</button>
+        <span className="transp-val">{st>0?"+":""}{st}</span>
+        <button className="btn-transp" onClick={()=>setSt(s=>s+1)}>+</button>
+        <button className="btn-reset" onClick={()=>setSt(0)}>Reset</button>
+        <button className={`btn-instrumento${st===5?" active":""}`} onClick={()=>setSt(s=>s===5?0:5)}>
+          {st===5?"🎵 Guitalele":"🎸 Guitarra"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Editor letra ──
 function EditorLetra({value,onChange}){
   const[ac,setAc]=useState("");
   const ins=()=>{
     if(!ac.trim())return;
-    const ta=document.getElementById("eta");
-    if(!ta)return;
+    const ta=document.getElementById("eta");if(!ta)return;
     const p=ta.selectionStart;
     onChange(value.slice(0,p)+`[${ac.trim()}]`+value.slice(p));
     setAc("");
@@ -221,9 +301,9 @@ function EditorLetra({value,onChange}){
       <input value={ac} onChange={e=>setAc(e.target.value)} onKeyDown={e=>e.key==="Enter"&&ins()} placeholder="Am, G7..." maxLength={6}/>
       <button onClick={ins}>↵</button>
     </div>
-    <p className="acorde-hint">Posiciona el cursor en la sílaba, escribe el acorde y presiona ↵.</p>
-    <textarea id="eta" value={value} onChange={e=>onChange(e.target.value)} rows={10}
-      placeholder={"Escribe la letra.\nUsa [Am] antes de la sílaba donde cae el acorde."} className="field-textarea" style={{fontFamily:"monospace"}}/>
+    <p className="acorde-hint">Posiciona el cursor en la sílaba y presiona ↵.</p>
+    <textarea id="eta" value={value} onChange={e=>onChange(e.target.value)} rows={12}
+      placeholder={"[Am]Cuando la [G]lluvia ca[Dm]yó\n[F]ejemplo de letra cifrada"} className="field-textarea" style={{fontFamily:"monospace",fontSize:13}}/>
   </div>);
 }
 
@@ -238,162 +318,23 @@ function Campo({label,value,onChange,multiline,placeholder,editando}){
   </div>);
 }
 
-function IAModal({onClose,onCrear,apiKey,setApiKey}){
-  const[tab,setTab]=useState("chat");
-  const[msgs,setMsgs]=useState([{bot:true,txt:"¡Hola! Cuéntame sobre la canción. Dime nombre, estilo, instrumentos, letra con acordes, en qué estado está..."}]);
-  const[input,setInput]=useState("");
-  const[loading,setLoading]=useState(false);
-  const[preview,setPreview]=useState(null);
-  const[rec,setRec]=useState(false);
-  const botRef=useRef(null);
+const ESTADOS=["Idea","En desarrollo","Casi lista","Terminada"];
+const BADGE={"Idea":"badge badge-idea","En desarrollo":"badge badge-dev","Casi lista":"badge badge-almost","Terminada":"badge badge-done"};
+const CATS={"Voces":["Voz principal","Segunda voz"],"Cuerdas":["Guitarra de palo","Guitarra eléctrica","Guitalele","Ukelele"],"Bajos":["Bajo","Ubass"],"Teclados / Viento":["Teclado","Acordeón"],"Percusión":["Cajón peruano","Batería tradicional","Jamblock","Cencerro","Djembe","Bongo","Conga"]};
+const TODOS=Object.values(CATS).flat();
+const EMPTY={nombre:"",estado:"Idea",estilo:"",tempo:"",tonalidad:"",instrumentos:[],letra:"",audioUrl:"",queFalta:"",notasEnsayo:""};
 
-  useEffect(()=>{botRef.current?.scrollIntoView({behavior:"smooth"});},[msgs]);
-
-  const addMsg=(txt,bot)=>setMsgs(p=>[...p,{bot,txt}]);
-
-  const enviar=async(txt)=>{
-    if(!txt.trim()||loading)return;
-    if(!apiKey){alert("Ingresa tu API Key de OpenAI primero.");return;}
-    addMsg(txt,false);
-    setInput("");
-    setLoading(true);
-    addMsg("...",true);
-    try{
-      const resp=await callAI(apiKey,txt);
-      const json=parseJSON(resp);
-      setMsgs(p=>[...p.slice(0,-1),{bot:true,txt:json?"✅ Información extraída. Revisa el resumen abajo.":"No pude extraer la información. ¿Puedes dar más detalles?"}]);
-      if(json)setPreview(json);
-    }catch(e){
-      setMsgs(p=>[...p.slice(0,-1),{bot:true,txt:"Error: "+e.message}]);
-    }
-    setLoading(false);
-  };
-
-  const procesarTexto=async(txt)=>{
-    if(!apiKey){alert("Ingresa tu API Key de OpenAI primero.");return;}
-    setLoading(true);
-    setMsgs([{bot:true,txt:"Procesando archivo..."}]);
-    try{
-      const resp=await callAI(apiKey,"Extrae la información musical de este texto:\n\n"+txt);
-      const json=parseJSON(resp);
-      setMsgs([{bot:true,txt:json?"✅ Archivo procesado. Revisa el resumen.":"No pude procesar el archivo."}]);
-      if(json)setPreview(json);
-    }catch(e){
-      setMsgs([{bot:true,txt:"Error: "+e.message}]);
-    }
-    setLoading(false);
-  };
-
-  const leerArchivo=async(file)=>{
-    setTab("archivo");
-    if(file.name.endsWith(".pdf")){
-      try{
-        const ab=await file.arrayBuffer();
-        const str=new TextDecoder("latin1").decode(new Uint8Array(ab));
-        const m=str.match(/BT[\s\S]*?ET/g)||[];
-        let txt=m.map(b=>{const tj=b.match(/\(([^)]*)\)\s*T[jJ]/g)||[];return tj.map(t=>t.replace(/\(([^)]*)\)\s*T[jJ]/,"$1")).join(" ");}).join("\n").trim();
-        if(txt.length<20){const raw=str.match(/\(([^\)]{2,80})\)/g)||[];txt=raw.map(r=>r.slice(1,-1)).filter(r=>/[a-zA-ZáéíóúñÁÉÍÓÚÑ]{3,}/.test(r)).join(" ");}
-        if(txt.length<10){setMsgs([{bot:true,txt:"No pude leer el PDF. Prueba exportando como .txt."}]);return;}
-        await procesarTexto(txt);
-      }catch(e){setMsgs([{bot:true,txt:"Error leyendo PDF: "+e.message}]);}
-    } else if(file.name.endsWith(".docx")){
-      try{
-        const ab=await file.arrayBuffer();
-        const str=new TextDecoder("utf-8",{fatal:false}).decode(new Uint8Array(ab));
-        const m=str.match(/<w:t[^>]*>([^<]*)<\/w:t>/g)||[];
-        const txt=m.length?m.map(x=>x.replace(/<[^>]+>/g,"")).join(" "):str.replace(/<[^>]+>/g," ").replace(/\s+/g," ");
-        await procesarTexto(txt);
-      }catch(e){setMsgs([{bot:true,txt:"Error leyendo DOCX: "+e.message}]);}
-    } else {
-      const txt=await file.text();
-      await procesarTexto(txt);
-    }
-  };
-
-  const startSpeech=()=>{
-    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    if(!SR){alert("Usa Chrome para reconocimiento de voz.");return;}
-    const r=new SR();r.lang="es-CL";r.continuous=false;r.interimResults=false;
-    r.onresult=e=>setInput(p=>(p+" "+e.results[0][0].transcript).trim());
-    r.onend=()=>setRec(false);
-    r.onerror=()=>setRec(false);
-    r.start();setRec(true);
-  };
-
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal-sheet">
-        <div className="modal-header">
-          <span style={{fontSize:24}}>✨</span>
-          <h2>Asistente IA</h2>
-          <button onClick={onClose} style={{background:"none",color:"white",fontSize:22}}>✕</button>
-        </div>
-        <div className="modal-body">
-          <div className="api-box">
-            <label>API Key de OpenAI</label>
-            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="sk-..."/>
-            <p>platform.openai.com → API Keys</p>
-          </div>
-          <div className="ia-tabs">
-            <button className={`ia-tab${tab==="chat"?" active":""}`} onClick={()=>setTab("chat")}>💬 Chat / Voz</button>
-            <button className={`ia-tab${tab==="archivo"?" active":""}`} onClick={()=>setTab("archivo")}>📄 Importar archivo</button>
-          </div>
-
-          {tab==="archivo"&&(
-            <div>
-              <div className="upload-zone" onClick={()=>document.getElementById("finp").click()}
-                onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)leerArchivo(f);}}>
-                <div style={{fontSize:36}}>📄</div>
-                <p>Toca para subir un archivo</p>
-                <span>.txt · .docx · .pdf</span>
-                <input id="finp" type="file" accept=".txt,.docx,.pdf" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)leerArchivo(f);e.target.value="";}}/>
-              </div>
-            </div>
-          )}
-
-          {msgs.map((m,i)=>(
-            <div key={i} className={m.bot?"ia-msg-bot":"ia-msg-user"}>{m.txt}</div>
-          ))}
-          <div ref={botRef}/>
-
-          {preview&&(
-            <div className="preview-box">
-              <h3>✅ Canción detectada</h3>
-              {[["Nombre",preview.nombre],["Estado",preview.estado],["Estilo",preview.estilo],["Tempo",preview.tempo],["Tonalidad",preview.tonalidad],["Instrumentos",(preview.instrumentos||[]).join(", ")],["Qué falta",preview.queFalta]].filter(([,v])=>v).map(([l,v])=>(
-                <div key={l} className="preview-row"><span className="lbl">{l}</span><span className="val">{v}</span></div>
-              ))}
-              {preview.letra&&<div className="preview-row"><span className="lbl">Letra</span><span className="val" style={{fontSize:12,color:"#6b7280"}}>{preview.letra.slice(0,80)}…</span></div>}
-              <button className="btn-apply" onClick={()=>{onCrear(preview);onClose();}}>➕ Agregar a la Salita</button>
-            </div>
-          )}
-        </div>
-
-        {tab==="chat"&&(
-          <div className="modal-footer">
-            <div className="ia-input-row">
-              <button className={`btn-mic${rec?" rec":""}`} onClick={startSpeech}>{rec?"⏹":"🎤"}</button>
-              <textarea value={input} onChange={e=>setInput(e.target.value)} placeholder="Describe la canción..." rows={2}
-                onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();enviar(input);}}}/>
-              <button className="btn-send" onClick={()=>enviar(input)} disabled={loading}>➤</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
+// ── Ficha ──
 function Ficha({cancion,onSave,onBack,onDelete}){
-  const[data,setData]=useState({...EMPTY_SONG,...cancion});
+  const[data,setData]=useState({...EMPTY,...cancion});
   const[editando,setEditando]=useState(!cancion.nombre);
   const[newI,setNewI]=useState("");
   const[confirm,setConfirm]=useState(false);
   const[saving,setSaving]=useState(false);
-  const[guitalele,setGuitalele]=useState(false);
+  const[verLetra,setVerLetra]=useState(false);
   const set=(k,v)=>setData(d=>({...d,[k]:v}));
   const togI=i=>set("instrumentos",(data.instrumentos||[]).includes(i)?(data.instrumentos||[]).filter(x=>x!==i):[...(data.instrumentos||[]),i]);
   const guardar=async()=>{setSaving(true);await onSave(data);setSaving(false);setEditando(false);};
-  const letraVista=guitalele?trT(data.letra||"",5):(data.letra||"");
   const extras=(data.instrumentos||[]).filter(i=>!TODOS.includes(i));
   const getEmbed=url=>{
     if(!url)return null;
@@ -406,6 +347,7 @@ function Ficha({cancion,onSave,onBack,onDelete}){
 
   return(
     <div className="app">
+      {verLetra&&<LetraFullScreen cancion={data} onClose={()=>setVerLetra(false)}/>}
       <div className="ficha-header">
         <div className="ficha-header-inner">
           <button className="btn-back" onClick={onBack}>←</button>
@@ -439,6 +381,11 @@ function Ficha({cancion,onSave,onBack,onDelete}){
           )}
         </div>
 
+        {/* Botón ver letra */}
+        {!editando&&(data.letra||"").trim()&&(
+          <button className="btn-ver-letra" onClick={()=>setVerLetra(true)}>🎵 Ver letra y acordes</button>
+        )}
+
         <div style={{marginBottom:16}}>
           <label className="field-label">Instrumentos</label>
           {editando?(
@@ -457,17 +404,14 @@ function Ficha({cancion,onSave,onBack,onDelete}){
             :<span className="field-empty">Sin definir</span>}
         </div>
 
-        <hr className="divider"/>
+        <div className="divider"/>
 
-        <div style={{marginBottom:16}}>
-          <div className="letra-header">
-            <label className="field-label" style={{margin:0}}>Letra y acordes</label>
-            {!editando&&<button onClick={()=>setGuitalele(g=>!g)} className={`btn-modo${guitalele?" active":""}`}>{guitalele?"🎵 Guitalele":"🎸 Guitarra"}</button>}
+        {editando&&(
+          <div style={{marginBottom:16}}>
+            <label className="field-label">Letra y acordes</label>
+            <EditorLetra value={data.letra||""} onChange={v=>set("letra",v)}/>
           </div>
-          <div style={{marginTop:8}}>{editando?<EditorLetra value={data.letra||""} onChange={v=>set("letra",v)}/>:<LetraCifrada texto={letraVista}/>}</div>
-        </div>
-
-        <hr className="divider"/>
+        )}
 
         <div style={{marginBottom:16}}>
           <label className="field-label">Audio de referencia</label>
@@ -475,16 +419,16 @@ function Ficha({cancion,onSave,onBack,onDelete}){
           {embed?<iframe src={embed} className="audio-iframe" allow="autoplay" title="audio"/>:!editando&&<p className="field-empty">Sin audio cargado</p>}
         </div>
 
-        <hr className="divider"/>
+        <div className="divider"/>
         <Campo label="¿Qué falta para terminarla?" value={data.queFalta||""} onChange={v=>set("queFalta",v)} multiline placeholder="Lo que falta antes de darla por terminada..." editando={editando}/>
-        <hr className="divider"/>
+        <div className="divider"/>
         <Campo label="Notas del último ensayo" value={data.notasEnsayo||""} onChange={v=>set("notasEnsayo",v)} multiline placeholder="Ideas, acuerdos, cosas pendientes..." editando={editando}/>
 
         {editando&&<button className="btn-guardar-big" onClick={guardar} disabled={saving}>{saving?"Guardando...":"Guardar ficha"}</button>}
 
         <div className="eliminar-zone">
           {confirm
-            ?<div className="confirm-box"><p>¿Eliminar "{data.nombre}" definitivamente?</p><div className="confirm-row"><button className="btn-confirm-yes" onClick={()=>onDelete(data.id)}>Sí, eliminar</button><button className="btn-confirm-no" onClick={()=>setConfirm(false)}>Cancelar</button></div></div>
+            ?<div className="confirm-box"><p>¿Eliminar "{data.nombre}"?</p><div className="confirm-row"><button className="btn-confirm-yes" onClick={()=>onDelete(data.id)}>Sí, eliminar</button><button className="btn-confirm-no" onClick={()=>setConfirm(false)}>Cancelar</button></div></div>
             :<button className="btn-eliminar" onClick={()=>setConfirm(true)}>Eliminar esta canción</button>}
         </div>
       </div>
@@ -492,6 +436,145 @@ function Ficha({cancion,onSave,onBack,onDelete}){
   );
 }
 
+// ── Modal IA ──
+const SYSTEM=`Eres un asistente para la app "Salita de Ensayo" del grupo Modesto Chaleca.
+Extrae información musical y devuelve SOLO un JSON válido con esta estructura exacta:
+{"nombre":"","estado":"Idea","estilo":"","tempo":"","tonalidad":"","instrumentos":[],"letra":"","queFalta":"","notasEnsayo":"","audioUrl":""}
+Para la letra: usa formato [Acorde]sílaba. Sin texto adicional ni backticks.`;
+
+async function callAI(apiKey,txt){
+  const r=await fetch("https://api.openai.com/v1/chat/completions",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},
+    body:JSON.stringify({model:"gpt-4o-mini",max_tokens:2000,messages:[{role:"system",content:SYSTEM},{role:"user",content:txt}]})
+  });
+  const d=await r.json();
+  if(d.error)throw new Error(d.error.message);
+  return d.choices[0].message.content;
+}
+function parseJSON(txt){try{return JSON.parse(txt.replace(/```json|```/g,"").trim());}catch{return null;}}
+
+function IAModal({onClose,onCrear,apiKey,setApiKey}){
+  const[tab,setTab]=useState("chat");
+  const[msgs,setMsgs]=useState([{bot:true,txt:"¡Hola! Cuéntame sobre la canción. Puedes hablar o escribir."}]);
+  const[input,setInput]=useState("");
+  const[loading,setLoading]=useState(false);
+  const[preview,setPreview]=useState(null);
+  const[rec,setRec]=useState(false);
+  const botRef=useRef(null);
+  useEffect(()=>{botRef.current?.scrollIntoView({behavior:"smooth"});},[msgs]);
+
+  const enviar=async(txt)=>{
+    if(!txt.trim()||loading)return;
+    if(!apiKey){alert("Ingresa tu API Key de OpenAI.");return;}
+    setMsgs(p=>[...p,{bot:false,txt},{bot:true,txt:"..."}]);
+    setInput("");setLoading(true);
+    try{
+      const resp=await callAI(apiKey,txt);
+      const json=parseJSON(resp);
+      setMsgs(p=>[...p.slice(0,-1),{bot:true,txt:json?"✅ Información extraída. Revisa el resumen.":"No pude extraer la info. ¿Puedes dar más detalles?"}]);
+      if(json)setPreview(json);
+    }catch(e){setMsgs(p=>[...p.slice(0,-1),{bot:true,txt:"Error: "+e.message}]);}
+    setLoading(false);
+  };
+
+  const procesarTexto=async(txt)=>{
+    if(!apiKey){alert("Ingresa tu API Key de OpenAI.");return;}
+    setLoading(true);setMsgs([{bot:true,txt:"Procesando archivo..."}]);
+    try{
+      const resp=await callAI(apiKey,"Extrae la información musical de este texto:\n\n"+txt);
+      const json=parseJSON(resp);
+      setMsgs([{bot:true,txt:json?"✅ Archivo procesado.":"No pude procesar el archivo."}]);
+      if(json)setPreview(json);
+    }catch(e){setMsgs([{bot:true,txt:"Error: "+e.message}]);}
+    setLoading(false);
+  };
+
+  const leerArchivo=async(file)=>{
+    setTab("archivo");
+    try{
+      let txt="";
+      if(file.name.endsWith(".pdf")){
+        const ab=await file.arrayBuffer();
+        const str=new TextDecoder("latin1").decode(new Uint8Array(ab));
+        const m=str.match(/BT[\s\S]*?ET/g)||[];
+        txt=m.map(b=>{const tj=b.match(/\(([^)]*)\)\s*T[jJ]/g)||[];return tj.map(t=>t.replace(/\(([^)]*)\)\s*T[jJ]/,"$1")).join(" ");}).join("\n").trim();
+        if(txt.length<20){const raw=str.match(/\(([^\)]{2,80})\)/g)||[];txt=raw.map(r=>r.slice(1,-1)).filter(r=>/[a-zA-ZáéíóúñÁÉÍÓÚÑ]{3,}/.test(r)).join(" ");}
+        if(txt.length<10){setMsgs([{bot:true,txt:"No pude leer el PDF. Exporta como .txt desde Google Docs."}]);return;}
+      } else if(file.name.endsWith(".docx")){
+        const ab=await file.arrayBuffer();
+        const str=new TextDecoder("utf-8",{fatal:false}).decode(new Uint8Array(ab));
+        const m=str.match(/<w:t[^>]*>([^<]*)<\/w:t>/g)||[];
+        txt=m.length?m.map(x=>x.replace(/<[^>]+>/g,"")).join(" "):str.replace(/<[^>]+>/g," ").replace(/\s+/g," ");
+      } else {
+        txt=await file.text();
+      }
+      await procesarTexto(txt);
+    }catch(e){setMsgs([{bot:true,txt:"Error leyendo archivo: "+e.message}]);}
+  };
+
+  const startSpeech=()=>{
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){alert("Usa Chrome para voz.");return;}
+    const r=new SR();r.lang="es-CL";r.continuous=false;r.interimResults=false;
+    r.onresult=e=>setInput(p=>(p+" "+e.results[0][0].transcript).trim());
+    r.onend=()=>setRec(false);r.onerror=()=>setRec(false);
+    r.start();setRec(true);
+  };
+
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-header">
+          <span style={{fontSize:24}}>✨</span><h2>Asistente IA</h2>
+          <button onClick={onClose} style={{background:"none",color:"white",fontSize:22}}>✕</button>
+        </div>
+        <div className="modal-body">
+          <div className="api-box">
+            <label>API Key de OpenAI</label>
+            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="sk-..."/>
+            <p>platform.openai.com → API Keys</p>
+          </div>
+          <div className="ia-tabs">
+            <button className={`ia-tab${tab==="chat"?" active":""}`} onClick={()=>setTab("chat")}>💬 Chat / Voz</button>
+            <button className={`ia-tab${tab==="archivo"?" active":""}`} onClick={()=>setTab("archivo")}>📄 Importar archivo</button>
+          </div>
+          {tab==="archivo"&&(
+            <div className="upload-zone" onClick={()=>document.getElementById("finp").click()}
+              onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();const f=e.dataTransfer.files[0];if(f)leerArchivo(f);}}>
+              <div style={{fontSize:36}}>📄</div><p>Toca para subir un archivo</p><span>.txt · .docx · .pdf</span>
+              <input id="finp" type="file" accept=".txt,.docx,.pdf" style={{display:"none"}} onChange={e=>{const f=e.target.files[0];if(f)leerArchivo(f);e.target.value="";}}/>
+            </div>
+          )}
+          {msgs.map((m,i)=><div key={i} className={m.bot?"ia-msg-bot":"ia-msg-user"}>{m.txt}</div>)}
+          <div ref={botRef}/>
+          {preview&&(
+            <div className="preview-box">
+              <h3>✅ Canción detectada</h3>
+              {[["Nombre",preview.nombre],["Estado",preview.estado],["Estilo",preview.estilo],["Tempo",preview.tempo],["Tonalidad",preview.tonalidad],["Instrumentos",(preview.instrumentos||[]).join(", ")],["Qué falta",preview.queFalta]].filter(([,v])=>v).map(([l,v])=>(
+                <div key={l} className="preview-row"><span className="lbl">{l}</span><span className="val">{v}</span></div>
+              ))}
+              {preview.letra&&<div className="preview-row"><span className="lbl">Letra</span><span className="val" style={{fontSize:12,color:"#6b7280"}}>{preview.letra.slice(0,80)}…</span></div>}
+              <button className="btn-apply" onClick={()=>{onCrear(preview);onClose();}}>➕ Agregar a la Salita</button>
+            </div>
+          )}
+        </div>
+        {tab==="chat"&&(
+          <div className="modal-footer">
+            <div className="ia-input-row">
+              <button className={`btn-mic${rec?" rec":""}`} onClick={startSpeech}>{rec?"⏹":"🎤"}</button>
+              <textarea value={input} onChange={e=>setInput(e.target.value)} placeholder="Describe la canción..." rows={2}
+                onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();enviar(input);}}}/>
+              <button className="btn-send" onClick={()=>enviar(input)} disabled={loading}>➤</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── App ──
 function App(){
   const[canciones,setCanciones]=useState(null);
   const[selected,setSelected]=useState(null);
@@ -501,7 +584,6 @@ function App(){
   const[filtro,setFiltro]=useState("Todas");
   const[syncing,setSyncing]=useState(false);
   const[apiKey,setApiKey]=useState(()=>{try{return localStorage.getItem("oai-key")||"";}catch{return "";}});
-
   useEffect(()=>{try{if(apiKey)localStorage.setItem("oai-key",apiKey);}catch{}},[apiKey]);
 
   useEffect(()=>{
@@ -516,7 +598,6 @@ function App(){
     setSyncing(true);
     try{
       const{id,...rest}=u;
-      // Limpiar campos undefined
       const clean=Object.fromEntries(Object.entries(rest).filter(([,v])=>v!==undefined));
       await db.collection("canciones").doc(String(id)).set({...clean,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
       setSelected({...u});
@@ -534,10 +615,10 @@ function App(){
     if(!nombre.trim())return;
     setSyncing(true);
     try{
-      const n={...EMPTY_SONG,nombre,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+      const n={...EMPTY,nombre,createdAt:firebase.firestore.FieldValue.serverTimestamp()};
       const ref=await db.collection("canciones").add(n);
       setNombreNueva("");setShowNueva(false);
-      setSelected({id:ref.id,...EMPTY_SONG,nombre});
+      setSelected({id:ref.id,...EMPTY,nombre});
     }catch(e){console.error(e);}
     setSyncing(false);
   };
@@ -546,20 +627,14 @@ function App(){
     setSyncing(true);
     try{
       const n={
-        nombre:data.nombre||"Sin nombre",
-        estado:data.estado||"Idea",
-        estilo:data.estilo||"",
-        tempo:data.tempo||"",
-        tonalidad:data.tonalidad||"",
+        nombre:data.nombre||"Sin nombre",estado:data.estado||"Idea",estilo:data.estilo||"",
+        tempo:data.tempo||"",tonalidad:data.tonalidad||"",
         instrumentos:Array.isArray(data.instrumentos)?data.instrumentos:[],
-        letra:data.letra||"",
-        audioUrl:data.audioUrl||"",
-        queFalta:data.queFalta||"",
-        notasEnsayo:data.notasEnsayo||"",
+        letra:data.letra||"",audioUrl:data.audioUrl||"",
+        queFalta:data.queFalta||"",notasEnsayo:data.notasEnsayo||"",
         createdAt:firebase.firestore.FieldValue.serverTimestamp()
       };
       const ref=await db.collection("canciones").add(n);
-      // Abrir ficha con datos limpios (sin Timestamp)
       const{createdAt,...sinTS}=n;
       setSelected({id:ref.id,...sinTS});
     }catch(e){console.error(e);}
@@ -572,7 +647,7 @@ function App(){
 
   if(selected){
     const fresh=canciones.find(c=>c.id===selected.id)||selected;
-    return <Ficha cancion={{...EMPTY_SONG,...fresh}} onSave={saveSong} onBack={()=>setSelected(null)} onDelete={deleteSong}/>;
+    return<Ficha cancion={{...EMPTY,...fresh}} onSave={saveSong} onBack={()=>setSelected(null)} onDelete={deleteSong}/>;
   }
 
   const filtradas=filtro==="Todas"?canciones:canciones.filter(c=>c.estado===filtro);
@@ -603,7 +678,7 @@ function App(){
             <button className="btn-cancelar" onClick={()=>setShowNueva(false)}>✕</button>
           </div>
         ):<button className="btn-new" onClick={()=>setShowNueva(true)}>+ Nueva canción (manual)</button>}
-        {filtradas.length===0&&<p className="empty-msg">{canciones.length===0?"¡Aún no hay canciones! Crea la primera.":"No hay canciones en este estado."}</p>}
+        {filtradas.length===0&&<p className="empty-msg">{canciones.length===0?"¡Aún no hay canciones!":"No hay canciones en este estado."}</p>}
         {filtradas.map(c=>(
           <div key={c.id} className="song-card" onClick={()=>setSelected(c)}>
             <div className="song-card-top"><h3>{c.nombre}</h3><span className={BADGE[c.estado]||"badge badge-idea"}>{c.estado}</span></div>
