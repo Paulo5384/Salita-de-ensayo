@@ -163,15 +163,15 @@ const CATS={"Voces":["Voz principal","Segunda voz"],"Cuerdas":["Guitarra de palo
 const TODOS_INSTR=Object.values(CATS).flat();
 
 // ── Claude API ──
-async function callOpenAI(apiKey, messages, system) {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+async function callIA(apiKey, messages, system) {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
     method:"POST",
-    headers:{"Content-Type":"application/json","Authorization":"Bearer "+apiKey},
-    body:JSON.stringify({model:"gpt-4o-mini",max_tokens:2000,messages:[{role:"system",content:system},...messages.map(m=>({role:m.role==="bot"?"assistant":"user",content:m.content||m.text}))]})
+    headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true","x-api-key":apiKey},
+    body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:2000,system,messages:messages.map(m=>({role:m.role==="bot"?"assistant":"user",content:m.content||m.text}))})
   });
   const data = await res.json();
   if(data.error) throw new Error(data.error.message);
-  return data.choices[0].message.content;
+  return data.content[0].text;
 }
 
 const SYSTEM_FICHA = `Eres un asistente para la app "Salita de Ensayo" del grupo musical Modesto Chaleca.
@@ -262,7 +262,7 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
     setInput("");setLoading(true);
     try{
       const history=[...msgs.filter(m=>m.role!=="bot"||!m.thinking).map(m=>({role:m.role==="bot"?"assistant":"user",content:m.text})),{role:"user",content:texto}];
-      const resp=await callOpenAI(apiKey,history,SYSTEM_FICHA);
+      const resp=await callIA(apiKey,history,SYSTEM_FICHA);
       const json=parseJSON(resp);
       setMsgs(p=>[...p.slice(0,-1),{role:"bot",text:json?"He extraído la información. Revisa el resumen abajo y confirma si está correcto.":"No pude extraer la información. ¿Puedes darme más detalles?"}]);
       if(json)setPreview(json);
@@ -275,7 +275,7 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
     setLoading(true);
     setMsgs([{role:"bot",text:"Procesando el archivo..."}]);
     try{
-      const resp=await callOpenAI(apiKey,[{role:"user",content:"Extrae la información musical de este texto:\n\n"+txt}],SYSTEM_FICHA);
+      const resp=await callIA(apiKey,[{role:"user",content:"Extrae la información musical de este texto:\n\n"+txt}],SYSTEM_FICHA);
       const json=parseJSON(resp);
       setMsgs([{role:"bot",text:json?"¡Listo! Extraje la información del archivo. Revisa el resumen.":"No pude procesar el archivo."}]);
       if(json)setPreview(json);
@@ -363,8 +363,10 @@ function IAModal({onClose, onCreateSong, apiKey, setApiKey}){
         </div>
         <div className="modal-body">
           <div className="api-config">
-            <label>API Key de OpenAI (ChatGPT)</label>
-            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="sk-..."/>
+            <label>API Key de Claude (console.anthropic.com → API Keys)</label>
+            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} placeholder="sk-ant-..."/>
+            <p style={{fontSize:11,color:"#9ca3af",marginTop:4}}>Registro gratis en console.anthropic.com · $5 de crédito inicial</p>
+          </div>
           </div>
           <div className="ia-tabs">
             <button className={`ia-tab${tab==="chat"?" active":""}`} onClick={()=>setTab("chat")}>💬 Chat / Voz</button>
@@ -541,10 +543,26 @@ function App(){
 
   const crearDesdeIA=async(data)=>{
     setSyncing(true);
-    const n={...data,instrumentos:data.instrumentos||[],createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    const n={
+      nombre:data.nombre||"",
+      estado:data.estado||"Idea",
+      estilo:data.estilo||"",
+      tempo:data.tempo||"",
+      tonalidad:data.tonalidad||"",
+      instrumentos:data.instrumentos||[],
+      letra:data.letra||"",
+      audioUrl:data.audioUrl||"",
+      queFalta:data.queFalta||"",
+      notasEnsayo:data.notasEnsayo||"",
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    };
     const ref=await db.collection("canciones").add(n);
-    const nueva={id:ref.id,...n};
-    setSelected(nueva);setSyncing(false);
+    // Esperar que Firestore confirme y traer el doc real
+    const snap=await ref.get();
+    const nueva={id:snap.id,...snap.data()};
+    setCanciones(p=>[...(p||[]),nueva]);
+    setSelected(nueva);
+    setSyncing(false);
   };
 
   if(!canciones)return(<div className="loading"><div style={{textAlign:"center"}}><div style={{fontSize:48}}>🪗</div><p style={{color:"#92400e",fontWeight:600,marginTop:8}}>Cargando Salita...</p></div></div>);
