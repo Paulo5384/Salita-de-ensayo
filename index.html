@@ -7,6 +7,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#78350f"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Salita"/>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -104,6 +109,12 @@ textarea{resize:none;}
 .btn-reset{background:#374151;color:#9ca3af;border-radius:8px;padding:6px 12px;font-size:12px;}
 .btn-guitalele{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid #374151;background:#1f2937;color:#9ca3af;}
 .btn-guitalele.on{background:#f59e0b;color:white;border-color:#f59e0b;}
+.scroll-controls{background:#0f172a;padding:8px 16px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;border-top:1px solid #1f2937;}
+.btn-scroll-play{background:#22c55e;color:white;border-radius:20px;padding:7px 18px;font-size:14px;font-weight:700;}
+.btn-scroll-play.playing{background:#ef4444;}
+.scroll-speed-label{color:#9ca3af;font-size:12px;}
+.scroll-speed-val{color:#22c55e;font-size:14px;font-weight:700;min-width:24px;text-align:center;}
+.btn-speed{background:#374151;color:white;border-radius:8px;padding:4px 12px;font-size:16px;font-weight:700;}
 .cancionero{font-family:'Courier New',monospace;}
 .c-bloque{margin-bottom:28px;}
 .c-seccion{display:block;color:#a78bfa;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;}
@@ -247,10 +258,36 @@ function Cancionero({texto,st}){
 
 function LetraFullScreen({cancion,onClose}){
   const[st,setSt]=useState(0);
+  const[playing,setPlaying]=useState(false);
+  const[speed,setSpeed]=useState(3); // 1=lento, 10=rápido
+  const bodyRef=useRef(null);
+  const rafRef=useRef(null);
   const subir=()=>setSt(s=>s+1);
   const bajar=()=>setSt(s=>s-1);
   const reset=()=>setSt(0);
   const toggleGuitalele=()=>setSt(s=>s===5?0:5);
+
+  // Scroll automático
+  useEffect(()=>{
+    if(playing){
+      const step=()=>{
+        if(bodyRef.current){
+          bodyRef.current.scrollTop+=speed*0.4;
+          // Si llegó al final, detener
+          const{scrollTop,scrollHeight,clientHeight}=bodyRef.current;
+          if(scrollTop+clientHeight>=scrollHeight-10){setPlaying(false);return;}
+        }
+        rafRef.current=requestAnimationFrame(step);
+      };
+      rafRef.current=requestAnimationFrame(step);
+    } else {
+      if(rafRef.current)cancelAnimationFrame(rafRef.current);
+    }
+    return()=>{if(rafRef.current)cancelAnimationFrame(rafRef.current);};
+  },[playing,speed]);
+
+  // Pausar scroll si el usuario toca la pantalla
+  const handleTouch=()=>{if(playing)setPlaying(false);};
 
   return(
     <div className="letra-fs">
@@ -258,8 +295,18 @@ function LetraFullScreen({cancion,onClose}){
         <button onClick={onClose} style={{background:"none",color:"#fcd34d",fontSize:22,padding:"0 4px"}}>✕</button>
         <h2>{cancion.nombre}</h2>
       </div>
-      <div className="letra-fs-body">
+      <div className="letra-fs-body" ref={bodyRef} onTouchStart={handleTouch}>
         <Cancionero texto={cancion.letra||""} st={st}/>
+        <div style={{height:120}}/>
+      </div>
+      <div className="scroll-controls">
+        <button className={`btn-scroll-play${playing?" playing":""}`} onClick={()=>setPlaying(p=>!p)}>
+          {playing?"⏸ Pausar":"▶ Auto-scroll"}
+        </button>
+        <span className="scroll-speed-label">Vel:</span>
+        <button className="btn-speed" onClick={()=>setSpeed(s=>Math.max(1,s-1))}>−</button>
+        <span className="scroll-speed-val">{speed}</span>
+        <button className="btn-speed" onClick={()=>setSpeed(s=>Math.min(10,s+1))}>+</button>
       </div>
       <div className="letra-fs-controls">
         <span className="transp-label">Tono:</span>
