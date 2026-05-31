@@ -557,10 +557,8 @@ function App(){
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
     };
     const ref=await db.collection("canciones").add(n);
-    // Esperar que Firestore confirme y traer el doc real
-    const snap=await ref.get();
-    const nueva={id:snap.id,...snap.data()};
-    setCanciones(p=>[...(p||[]),nueva]);
+    // Usar datos locales limpios para setSelected (sin Timestamp problemático)
+    const nueva={id:ref.id,...n,createdAt:null};
     setSelected(nueva);
     setSyncing(false);
   };
