@@ -7,6 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -202,6 +203,7 @@ firebase.initializeApp({
   appId:"1:277833011520:web:c3cd7a47271ebd035daaa5"
 });
 const db=firebase.firestore();
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 </script>
 <script type="text/babel">
 const {useState,useEffect,useRef}=React;
@@ -856,12 +858,32 @@ function IAModal({onClose,onCrear,apiKey,setApiKey}){
     try{
       let txt="";
       if(file.name.endsWith(".pdf")){
+        setMsgs([{bot:true,txt:"Leyendo PDF..."}]);
         const ab=await file.arrayBuffer();
-        const str=new TextDecoder("latin1").decode(new Uint8Array(ab));
-        const m=str.match(/BT[\s\S]*?ET/g)||[];
-        txt=m.map(b=>{const tj=b.match(/\(([^)]*)\)\s*T[jJ]/g)||[];return tj.map(t=>t.replace(/\(([^)]*)\)\s*T[jJ]/,"$1")).join(" ");}).join("\n").trim();
-        if(txt.length<20){const raw=str.match(/\(([^\)]{2,80})\)/g)||[];txt=raw.map(r=>r.slice(1,-1)).filter(r=>/[a-zA-ZáéíóúñÁÉÍÓÚÑ]{3,}/.test(r)).join(" ");}
-        if(txt.length<10){setMsgs([{bot:true,txt:"No pude leer el PDF. Exporta como .txt desde Google Docs."}]);return;}
+        const pdf=await pdfjsLib.getDocument({data:ab}).promise;
+        const partes=[];
+        for(let p=1;p<=pdf.numPages;p++){
+          const page=await pdf.getPage(p);
+          const content=await page.getTextContent();
+          // Agrupar por posición Y para mantener líneas
+          let lineaActual="";let yActual=null;
+          for(const item of content.items){
+            const y=Math.round(item.transform[5]);
+            if(yActual===null)yActual=y;
+            if(Math.abs(y-yActual)>2){
+              partes.push(lineaActual);
+              lineaActual="";
+              yActual=y;
+            }
+            lineaActual+=item.str;
+          }
+          if(lineaActual)partes.push(lineaActual);
+        }
+        txt=partes.join("\n").trim();
+        if(txt.length<10){
+          setMsgs([{bot:true,txt:"El PDF parece no tener texto extraíble (puede ser una imagen escaneada). Exporta como .txt desde Google Docs."}]);
+          return;
+        }
       } else if(file.name.endsWith(".docx")){
         const ab=await file.arrayBuffer();
         const str=new TextDecoder("utf-8",{fatal:false}).decode(new Uint8Array(ab));
